@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include erpnextaustria *.css
+recursive-include erpnextaustria *.csv
+recursive-include erpnextaustria *.html
+recursive-include erpnextaustria *.ico
+recursive-include erpnextaustria *.js
+recursive-include erpnextaustria *.json
+recursive-include erpnextaustria *.md
+recursive-include erpnextaustria *.png
+recursive-include erpnextaustria *.py
+recursive-include erpnextaustria *.svg
+recursive-include erpnextaustria *.txt
+recursive-exclude erpnextaustria *.pyc
