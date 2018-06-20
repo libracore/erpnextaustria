@@ -5,10 +5,10 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"module_name": "EPRNextAustria",
+			"module_name": "ERPNextAustria",
 			"color": "#627f43",
 			"icon": "octicon octicon-globe",
 			"type": "module",
-			"label": _("EPRNextAustria")
+			"label": _("ERPNextAustria")
 		}
 	]

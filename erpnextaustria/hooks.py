@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from . import __version__ as app_version
 
 app_name = "erpnextaustria"
-app_title = "EPRNextAustria"
+app_title = "ERPNextAustria"
 app_publisher = "libracore"
 app_description = "Country-specific extensions for ERPNext in Austria"
 app_icon = "octicon octicon-globe"

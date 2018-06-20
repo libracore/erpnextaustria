@@ -1,4 +1,4 @@
-# EPRNextAustria
+# ERPNextAustria
 Country-specific extensions for ERPNext in Austria
 
 ERPNext ([https://www.erpnext.org](https://www.erpnext.org)) is a global, leading, cloud based
