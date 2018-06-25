@@ -47,9 +47,7 @@ frappe.ui.form.on('AT VAT Declaration', {
 // force recalculate
 function recalculate(frm) {
     update_total_revenue(frm);
-    //update_taxable_revenue(frm);
-    //update_tax_amounts(frm);
-    //update_payable_tax(frm);
+
 }
 
 // retrieve values from database
@@ -78,6 +76,8 @@ frappe.ui.form.on('AT VAT Declaration', {
         'revenue':              function(frm) { update_total_revenue(frm) }, 
         'self_consumption':     function(frm) { update_total_revenue(frm) }, 
         'receiver_vat':         function(frm) { update_total_revenue(frm) },
+        'intercommunal_revenue': function(frm) { update_total_revenue(frm) },
+        'taxfree_intercommunal': function(frm) { update_total_revenue(frm) },
         'exports':              function(frm) { update_total_amount(frm) }, 
         'subcontracting':       function(frm) { update_total_amount(frm) }, 
         'cross_border':         function(frm) { update_total_amount(frm) }, 
@@ -85,7 +85,30 @@ frappe.ui.form.on('AT VAT Declaration', {
         'vehicles_without_uid': function(frm) { update_total_amount(frm) },
         'property_revenue':     function(frm) { update_total_amount(frm) },
         'small_business':       function(frm) { update_total_amount(frm) },
-        'taxfree_revenue':      function(frm) { update_total_amount(frm) }    
+        'taxfree_revenue':      function(frm) { update_total_amount(frm) },
+        'amount_normal':        function(frm) { update_tax_amounts(frm) },
+        'reduced_amount':       function(frm) { update_tax_amounts(frm) },
+        'reduced_amount_2':     function(frm) { update_tax_amounts(frm) },
+        'reduced_amount_3':     function(frm) { update_tax_amounts(frm) },
+        'amount_additional_1':  function(frm) { update_tax_amounts(frm) },
+        'amount_additional_2':  function(frm) { update_tax_amounts(frm) },
+        'amount_inter_normal':  function(frm) { update_tax_amounts(frm) },
+        'amount_inter_reduced_1':  function(frm) { update_tax_amounts(frm) },
+        'amount_inter_reduced_2':  function(frm) { update_tax_amounts(frm) },
+        'amount_inter_reduced_3':  function(frm) { update_tax_amounts(frm) },
+        'total_pretax':         function(frm) { update_pretax(frm) },
+        'import_pretax':        function(frm) { update_pretax(frm) },
+        'import_charge_pretax': function(frm) { update_pretax(frm) },
+        'intercommunal_pretax': function(frm) { update_pretax(frm) },
+        'taxation_pretax':      function(frm) { update_pretax(frm) },
+        'taxation_building_pretax': function(frm) { update_pretax(frm) },
+        'taxation_pretax_other_1':  function(frm) { update_pretax(frm) },
+        'taxation_pretax_other_2':  function(frm) { update_pretax(frm) },
+        'vehicles_pretax':      function(frm) { update_pretax(frm) },
+        'non_deductible_pretax':    function(frm) { update_pretax(frm) },
+        'corrections_1':        function(frm) { update_pretax(frm) },
+        'corrections_2':        function(frm) { update_pretax(frm) },
+        'tax_other_corrections':    function(frm) { update_tax_due(frm) }
     }
 );
 
@@ -104,8 +127,12 @@ function update_total_revenue(frm) {
         + float(frm.doc.self_consumption)
         - float(frm.doc.receiver_vat);
     frm.set_value('total_revenue', total_revenue); 
-    
-    cur_frm.refresh_field('total_revenue');
+
+    var total_inter_revenue = float(frm.doc.intercommunal_revenue) 
+        - float(frm.doc.taxfree_intercommunal);
+    frm.set_value('total_intercommunal', total_inter_revenue); 
+        
+    cur_frm.refresh_field('total_revenue', 'total_intercommunal');
     // cascade change: recalculate total amount
     update_total_amount(frm);
     
@@ -113,62 +140,92 @@ function update_total_revenue(frm) {
 
 // Update total amount
 function update_total_amount(frm) {
-    var total_amount = frm.doc.total_revenue 
-        - frm.doc.exports 
-        - frm.doc.subcontracting
-        - frm.doc.cross_border
-        - frm.doc.inner_eu
-        - frm.doc.vehicles_without_uid
-        - frm.doc.property_revenue
-        - frm.doc.small_business
-        - frm.doc.taxfree_revenue;
+    var total_amount = float(frm.doc.total_revenue) 
+        - float(frm.doc.exports) 
+        - float(frm.doc.subcontracting)
+        - float(frm.doc.cross_border)
+        - float(frm.doc.inner_eu)
+        - float(frm.doc.vehicles_without_uid)
+        - float(frm.doc.property_revenue)
+        - float(frm.doc.small_business)
+        - float(frm.doc.taxfree_revenue);
     frm.set_value('total_amount', total_amount);    
     
     cur_frm.refresh_field('total_amount');
-    // cascade change: 
+    // cascade change: taxes
+    update_tax_amounts(frm);
 }
 
 // Recalculate tax amount based on inputs
 function update_tax_amounts(frm) {
-    normal_tax = frm.doc.normal_amount * (frm.doc.normal_rate / 100);
-    reduced_tax = frm.doc.reduced_amount * (frm.doc.reduced_rate / 100);
-    lodging_tax = frm.doc.lodging_amount * (frm.doc.lodging_rate / 100);
-    tax_1 = frm.doc.amount_1 * (frm.doc.rate_1 / 100);
-    tax_2 = frm.doc.amount_2 * (frm.doc.rate_2 / 100);
-    total_tax = normal_tax + reduced_tax + lodging_tax + tax_1 + tax_2 + frm.doc.additional_tax;
-    frm.set_value('normal_tax', normal_tax);
-    frm.set_value('reduced_tax', reduced_tax);
-    frm.set_value('lodging_tax', lodging_tax);
-    frm.set_value('tax_1', tax_1);
-    frm.set_value('tax_2', tax_2);
-    frm.set_value('total_tax', total_tax);
+    frm.set_value('tax_normal', (0.2) * float(frm.doc.amount_normal));
+    frm.set_value('tax_reduced_rate_1', (0.1) * float(frm.doc.reduced_amount));
+    frm.set_value('tax_reduced_rate_2', (0.13) * float(frm.doc.reduced_amount_2));
+    frm.set_value('tax_reduced_rate_3', (0.19) * float(frm.doc.reduced_amount_3));
+    frm.set_value('tax_additional_1', (0.10) * float(frm.doc.amount_additional_1));
+    frm.set_value('tax_additional_2', (0.07) * float(frm.doc.amount_additional_2));
+    frm.set_value('tax_inter_normal', (0.2) * float(frm.doc.amount_inter_normal));
+    frm.set_value('tax_inter_reduced_1', (0.1) * float(frm.doc.amount_inter_reduced_1));
+    frm.set_value('tax_inter_reduced_2', (0.13) * float(frm.doc.amount_inter_reduced_2));
+    frm.set_value('tax_inter_reduced_3', (0.19) * float(frm.doc.amount_inter_reduced_3));
+    
+    cur_frm.refresh_field('tax_normal', 
+        'tax_reduced_rate_1', 
+        'tax_reduced_rate_2', 
+        'tax_reduced_rate_3', 
+        'tax_additional_1', 
+        'tax_additional_2', 
+        'tax_inter_normal', 
+        'tax_inter_reduced_1', 
+        'tax_inter_reduced_2', 
+        'tax_inter_reduced_3');
+        
+    // cascade change: pretax
+    update_pretax(frm);
 }
 
-// update deduction section
-function update_taxable_revenue(frm) {
-    var deductions =  frm.doc.tax_free_services +
-        frm.doc.revenue_abroad +
-        frm.doc.transfers + 
-        frm.doc.non_taxable_services + 
-        frm.doc.losses +
-        frm.doc.misc;
-    var taxable = frm.doc.total_revenue - frm.doc.non_taxable_revenue - deductions;
-    frm.set_value('total_deductions', deductions);
-    frm.set_value('taxable_revenue', taxable);
+// Update total amount
+function update_pretax(frm) {
+    var total_pretax = (-1) * float(frm.doc.total_pretax) 
+        - float(frm.doc.import_pretax) 
+        - float(frm.doc.import_charge_pretax)
+        - float(frm.doc.intercommunal_pretax)
+        - float(frm.doc.taxation_pretax)
+        - float(frm.doc.taxation_building_pretax)
+        - float(frm.doc.taxation_pretax_other_1)
+        - float(frm.doc.taxation_pretax_other_2)
+        - float(frm.doc.vehicles_pretax)
+        + float(frm.doc.non_deductible_pretax)
+        + float(frm.doc.corrections_1)
+        + float(frm.doc.corrections_2);
+    frm.set_value('total_deductable_pretax', total_pretax);    
+    
+    cur_frm.refresh_field('total_deductable_pretax');
+    // cascade change: taxes
+    update_tax_due(frm);
 }
 
-// update payable tax section        
-function update_payable_tax(frm) {
-    var pretax = frm.doc.pretax_material 
-        + frm.doc.pretax_investments 
-        + frm.doc.missing_pretax 
-        - frm.doc.pretax_correction_mixed
-        - frm.doc.pretax_correction_other
-        + frm.doc.form_1050
-        + frm.doc.form_1055;
-    frm.set_value('total_pretax_reductions', pretax);
-    var payable_tax = frm.doc.total_tax - pretax;
-    frm.set_value('payable_tax', payable_tax);
+// Update tax due
+function update_tax_due(frm) {
+    var total_tax_due = float(frm.doc.tax_normal) 
+        + float(frm.doc.tax_reduced_rate_1) 
+        + float(frm.doc.tax_reduced_rate_2)
+        + float(frm.doc.tax_reduced_rate_3)
+        + float(frm.doc.tax_additional_1)
+        + float(frm.doc.tax_additional_2)
+        + float(frm.doc.tax_056)
+        + float(frm.doc.tax_057)
+        + float(frm.doc.tax_048)
+        + float(frm.doc.tax_044)
+        + float(frm.doc.tax_032)
+        + float(frm.doc.tax_inter_normal)
+        + float(frm.doc.tax_inter_reduced_1)
+        + float(frm.doc.tax_inter_reduced_2)
+        + float(frm.doc.tax_inter_reduced_3)
+        - float(frm.doc.total_deductable_pretax)
+        + float(frm.doc.tax_other_corrections);
+    frm.set_value('total_tax_due', total_tax_due);    
+    cur_frm.refresh_field('total_tax_due');
 }
 
 /* view: view to use
