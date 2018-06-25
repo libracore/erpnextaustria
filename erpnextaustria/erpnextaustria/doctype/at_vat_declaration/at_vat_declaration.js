@@ -46,15 +46,16 @@ frappe.ui.form.on('AT VAT Declaration', {
 
 // force recalculate
 function recalculate(frm) {
-    update_taxable_revenue(frm);
-    update_tax_amounts(frm);
-    update_payable_tax(frm);
+    update_total_revenue(frm);
+    //update_taxable_revenue(frm);
+    //update_tax_amounts(frm);
+    //update_payable_tax(frm);
 }
 
 // retrieve values from database
 function get_values(frm) {
-    // Total revenue
-    get_total(frm, "viewVAT_200", 'total_revenue');
+    // Revenue
+    get_total(frm, "viewATVAT_000", 'revenue');
     // get_total(frm, "viewVAT_205", 'non_taxable_revenue');
     // Deductions
     //get_total(frm, "viewVAT_220", 'tax_free_services');
@@ -72,14 +73,60 @@ function get_values(frm) {
     //get_tax(frm, "viewVAT_405", 'pretax_investments');
 }
 
-// add change handlers for tax positions
-//frappe.ui.form.on("AT VAT Declaration", "normal_amount", function(frm) { update_tax_amounts(frm) } );
+// change handlers
+frappe.ui.form.on('AT VAT Declaration', {
+        'revenue':              function(frm) { update_total_revenue(frm) }, 
+        'self_consumption':     function(frm) { update_total_revenue(frm) }, 
+        'receiver_vat':         function(frm) { update_total_revenue(frm) },
+        'exports':              function(frm) { update_total_amount(frm) }, 
+        'subcontracting':       function(frm) { update_total_amount(frm) }, 
+        'cross_border':         function(frm) { update_total_amount(frm) }, 
+        'inner_eu':             function(frm) { update_total_amount(frm) },  
+        'vehicles_without_uid': function(frm) { update_total_amount(frm) },
+        'property_revenue':     function(frm) { update_total_amount(frm) },
+        'small_business':       function(frm) { update_total_amount(frm) },
+        'taxfree_revenue':      function(frm) { update_total_amount(frm) }    
+    }
+);
 
-// add change handlers for deduction positions
-//frappe.ui.form.on("AT VAT Declaration", "tax_free_services", function(frm) { update_taxable_revenue(frm) } );
+function float(value) {
+    var number = 0;
+    number = parseFloat(value);
+    if (isNaN(number)) {
+        number = 0;
+    }
+    return number;
+}
 
-// add change handlers for pretax
-//frappe.ui.form.on("AT VAT Declaration", "pretax_material", function(frm) { update_payable_tax(frm) } );
+// Update total revenue
+function update_total_revenue(frm) {
+    var total_revenue = float(frm.doc.revenue) 
+        + float(frm.doc.self_consumption)
+        - float(frm.doc.receiver_vat);
+    frm.set_value('total_revenue', total_revenue); 
+    
+    cur_frm.refresh_field('total_revenue');
+    // cascade change: recalculate total amount
+    update_total_amount(frm);
+    
+}
+
+// Update total amount
+function update_total_amount(frm) {
+    var total_amount = frm.doc.total_revenue 
+        - frm.doc.exports 
+        - frm.doc.subcontracting
+        - frm.doc.cross_border
+        - frm.doc.inner_eu
+        - frm.doc.vehicles_without_uid
+        - frm.doc.property_revenue
+        - frm.doc.small_business
+        - frm.doc.taxfree_revenue;
+    frm.set_value('total_amount', total_amount);    
+    
+    cur_frm.refresh_field('total_amount');
+    // cascade change: 
+}
 
 // Recalculate tax amount based on inputs
 function update_tax_amounts(frm) {
