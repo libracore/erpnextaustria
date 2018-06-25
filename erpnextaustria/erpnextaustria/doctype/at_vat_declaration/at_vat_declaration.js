@@ -9,7 +9,7 @@ frappe.ui.form.on('AT VAT Declaration', {
 		});
         frm.add_custom_button(__("Recalculate"), function() 
 		{
-			recalculate(frm);
+			update_total_revenue(frm);
 		});
         
         recalculate(frm);
@@ -44,31 +44,20 @@ frappe.ui.form.on('AT VAT Declaration', {
     }
 });
 
-// force recalculate
-function recalculate(frm) {
-    update_total_revenue(frm);
-
-}
-
 // retrieve values from database
 function get_values(frm) {
     // Revenue
     get_total(frm, "viewATVAT_000", 'revenue');
-    // get_total(frm, "viewVAT_205", 'non_taxable_revenue');
-    // Deductions
-    //get_total(frm, "viewVAT_220", 'tax_free_services');
-    //get_total(frm, "viewVAT_221", 'revenue_abroad');
-    //get_total(frm, "viewVAT_225", 'transfers');
-    //get_total(frm, "viewVAT_230", 'non_taxable_services');
-    //get_total(frm, "viewVAT_235", 'losses');
-    // Tax calculation
-    //get_total(frm, "viewVAT_321", 'amount_1');
-    //get_total(frm, "viewVAT_331", 'amount_2');
+    // Revenue at normal rate
+    get_total(frm, "viewATVAT_022", 'amount_normal');
+    // Intercommunal revenue 
+    get_total(frm, "viewATVAT_070", 'intercommunal_revenue');
+    get_total(frm, "viewATVAT_072", 'amount_inter_normal');
+    // Pretax
+    get_tax(frm, "viewATVAT_060", 'total_pretax');
 
-    //get_total(frm, "viewVAT_381", 'additional_amount');
-    // Pretaxes
-    //get_tax(frm, "viewVAT_400", 'pretax_material');
-    //get_tax(frm, "viewVAT_405", 'pretax_investments');
+    // Recalculate
+    update_total_revenue(frm);
 }
 
 // change handlers
