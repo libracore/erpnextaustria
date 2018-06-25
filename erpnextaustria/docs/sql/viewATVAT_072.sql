@@ -1,4 +1,4 @@
-CREATE VIEW `viewATVAT_022` AS
+CREATE VIEW `viewATVAT_072` AS
     SELECT 
         `tabSales Invoice`.`posting_date` AS `posting_date`,
         `tabSales Invoice`.`name` AS `name`,

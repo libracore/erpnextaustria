@@ -11,8 +11,6 @@ frappe.ui.form.on('AT VAT Declaration', {
 		{
 			update_total_revenue(frm);
 		});
-        
-        recalculate(frm);
 
         if (frm.doc.__islocal) {
             // this function is called when a new VAT declaration is created
@@ -41,6 +39,9 @@ frappe.ui.form.on('AT VAT Declaration', {
 
             frm.set_value('title', title);
         }
+        
+        // recalculate fresh values
+        update_total_revenue(frm);
     }
 });
 
