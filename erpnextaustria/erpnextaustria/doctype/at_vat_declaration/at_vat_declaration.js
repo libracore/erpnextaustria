@@ -56,7 +56,8 @@ function get_values(frm) {
     get_total(frm, "viewATVAT_072", 'amount_inter_normal');
     // Pretax
     get_tax(frm, "viewATVAT_060", 'total_pretax');
-
+    get_tax(frm, "viewATVAT_065", 'intercommunal_pretax');
+    
     // Recalculate
     update_total_revenue(frm);
 }
