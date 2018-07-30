@@ -14,7 +14,7 @@ def get_view_total(view_name, start_date, end_date):
 	""" executes a tax lookup query for a total 
 	
 	"""
-	sql_query = ("""SELECT IFNULL(SUM(`base_grand_total`), 0) AS `total` 
+	sql_query = ("""SELECT IFNULL(SUM(`base_net_total`), 0) AS `total` 
 			FROM `{0}` 
 			WHERE `posting_date` >= '{1}' 
 			AND `posting_date` <= '{2}'""".format(view_name, start_date, end_date))
