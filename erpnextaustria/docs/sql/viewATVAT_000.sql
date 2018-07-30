@@ -2,7 +2,8 @@ CREATE VIEW `viewATVAT_000` AS
     SELECT 
         `tabSales Invoice`.`name` AS `name`,
         `tabSales Invoice`.`posting_date` AS `posting_date`,
-        `tabSales Invoice`.`base_grand_total` AS `base_grand_total`
+        `tabSales Invoice`.`base_grand_total` AS `base_grand_total`,
+        `tabSales Invoice`.`base_net_total` AS `base_net_total`
     FROM
         `tabSales Invoice`
     WHERE
