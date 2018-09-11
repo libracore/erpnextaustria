@@ -30,5 +30,17 @@ def get_data():
                     "is_query_report": True
                 }
             ]
+        },
+        {
+            "label": _("Settings"),
+            "icon": "fa fa-wrench",
+            "items": [
+                   {
+                       "type": "doctype",
+                       "name": "ERPNextAustria Settings",
+                       "label": _("ERPNextAustria Settings"),
+                       "description": _("ERPNextAustria Settings")
+                   }
+            ]
         }
     ]
