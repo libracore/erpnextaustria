@@ -49,14 +49,23 @@ frappe.ui.form.on('AT VAT Declaration', {
 function get_values(frm) {
     // Revenue
     get_total(frm, "viewATVAT_000", 'revenue');
+    get_total(frm, "viewATVAT_011", 'exports');
+    get_total(frm, "viewATVAT_017", 'inner_eu');
+    get_total(frm, "viewATVAT_021", 'receiver_vat');
     // Revenue at normal rate
     get_total(frm, "viewATVAT_022", 'amount_normal');
+    get_total(frm, "viewATVAT_029", 'reduced_amount');
     // Intercommunal revenue 
     get_total(frm, "viewATVAT_070", 'intercommunal_revenue');
     get_total(frm, "viewATVAT_072", 'amount_inter_normal');
     // Pretax
     get_tax(frm, "viewATVAT_060", 'total_pretax');
+    get_tax(frm, "viewATVAT_061", 'import_pretax');
     get_tax(frm, "viewATVAT_065", 'intercommunal_pretax');
+    get_tax(frm, "viewATVAT_083", 'import_charge_pretax');
+    // reverse charge
+    get_tax(frm, "viewATVAT_057", 'tax_057');
+    get_tax(frm, "viewATVAT_066", 'taxation_pretax');
     
     // Recalculate
     update_total_revenue(frm);
