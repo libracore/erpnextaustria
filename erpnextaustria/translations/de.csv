@@ -67,3 +67,5 @@ DocType: AT VAT Declaration,Total deductable Pretax,"""Gesamtbetrag der abziehba
 DocType: AT VAT Declaration,Other corrections,"""Sonstige Berichtigungen"""
 DocType: AT VAT Declaration,Tax Amount,"""Steuerbetrag"""
 DocType: AT VAT Declaration,Total Tax Due,"""Gesamte fällige Steuer"""
+Report: Summary Message,Summary Message,Zusammenfassende Meldung
+Report: Intrastat,Intrastat,Intrastat
