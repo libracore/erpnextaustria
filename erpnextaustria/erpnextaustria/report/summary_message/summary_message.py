@@ -48,7 +48,7 @@ def get_data(month, year):
           /*`tabSales Invoice Item`.`base_net_amount`,*/
           /*`tabSales Invoice`.`name`, */
           /*`tabSales Invoice Item`.`item_code`,*/
-          IF(`tabItem`.`is_stock_item` = 1, "1", "") AS `code`
+          IF(`tabItem`.`is_stock_item` = 1, "", "1") AS `code`
           /* CONCAT(`tabCustomer`.`tax_id`, ":", `tabItem`.`is_stock_item`) AS `position` */
         FROM `tabSales Invoice Item`
         LEFT JOIN `tabSales Invoice` ON `tabSales Invoice Item`.`parent` = `tabSales Invoice`.`name`
@@ -58,6 +58,7 @@ def get_data(month, year):
           `tabSales Invoice`.`docstatus` = 1
           AND `tabSales Invoice`.`posting_date` >= '{year}-{month}-01'
           AND `tabSales Invoice`.`posting_date` < '{year2}-{month2}-01'
+          AND `tabCustomer`.`steuerregion` = "EU"
         GROUP BY (CONCAT(`tabCustomer`.`tax_id`, ":", `tabItem`.`is_stock_item`));""".format(
             year=year, month=month, year2=year2, month2=month2)
 
