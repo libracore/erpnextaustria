@@ -1,12 +1,10 @@
 CREATE VIEW `viewATVAT_070` AS
-    SELECT 
-        `tabSales Invoice`.`name` AS `name`,
-        `tabSales Invoice`.`posting_date` AS `posting_date`,
-	`tabSales Invoice`.`taxes_and_charges` AS `taxes_and_charges`,
-        `tabSales Invoice`.`base_grand_total` AS `base_grand_total`,
-        `tabSales Invoice`.`base_net_total` AS `base_net_total`
-    FROM
-        `tabSales Invoice`
-    WHERE
-        ((`tabSales Invoice`.`docstatus` = 1)
-            AND (`tabSales Invoice`.`taxes_and_charges` LIKE '%070%'))
+SELECT 
+    `tabPurchase Invoice`.`posting_date` AS `posting_date`, 
+    `tabPurchase Invoice`.`name` AS `name`, 
+    `tabPurchase Invoice`.`base_grand_total`  AS `base_grand_total`, 
+    `tabPurchase Invoice`.`base_net_total` AS `base_net_total`,
+    `tabPurchase Invoice`.`taxes_and_charges` AS `taxes_and_charges`, 
+    `tabPurchase Invoice`.`total_taxes_and_charges` AS `total_taxes_and_charges`
+FROM `tabPurchase Invoice` 
+WHERE `docstatus` = 1 AND `taxes_and_charges` LIKE '%070%'
