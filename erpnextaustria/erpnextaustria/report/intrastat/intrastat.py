@@ -55,7 +55,7 @@ def execute(filters=None):
         LEFT JOIN `tabPurchase Invoice` ON `tabPurchase Invoice Item`.`parent` = `tabPurchase Invoice`.`name`
         LEFT JOIN `tabItem` ON `tabPurchase Invoice Item`.`item_code` = `tabItem`.`item_code`
         WHERE `tabPurchase Invoice`.`docstatus` = 1
-          AND `tabPurchase Invoice`.`payment_terms_template` LIKE '%057%'
+          AND `tabPurchase Invoice`.`payment_terms_template` LIKE '%070%'
           AND `tabPurchase Invoice`.`posting_date` >= '{year}-{month}-01'
           AND `tabPurchase Invoice`.`posting_date` < '{year2}-{month2}-01'
         ;""".format(year=year, month=month, year2=year2, month2=month2)
