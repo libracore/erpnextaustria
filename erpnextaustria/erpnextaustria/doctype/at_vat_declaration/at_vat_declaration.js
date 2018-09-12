@@ -11,7 +11,11 @@ frappe.ui.form.on('AT VAT Declaration', {
 		{
 			update_total_revenue(frm);
 		});
-
+        frm.add_custom_button(__("Download XML"), function() 
+		{
+			download_xml(frm);
+		});
+        
         if (frm.doc.__islocal) {
             // this function is called when a new VAT declaration is created
             // get current month (0..11)
@@ -49,14 +53,23 @@ frappe.ui.form.on('AT VAT Declaration', {
 function get_values(frm) {
     // Revenue
     get_total(frm, "viewATVAT_000", 'revenue');
+    get_total(frm, "viewATVAT_011", 'exports');
+    get_total(frm, "viewATVAT_017", 'inner_eu');
+    get_total(frm, "viewATVAT_021", 'receiver_vat');
     // Revenue at normal rate
     get_total(frm, "viewATVAT_022", 'amount_normal');
+    get_total(frm, "viewATVAT_029", 'reduced_amount');
     // Intercommunal revenue 
     get_total(frm, "viewATVAT_070", 'intercommunal_revenue');
     get_total(frm, "viewATVAT_072", 'amount_inter_normal');
     // Pretax
     get_tax(frm, "viewATVAT_060", 'total_pretax');
+    get_tax(frm, "viewATVAT_061", 'import_pretax');
     get_tax(frm, "viewATVAT_065", 'intercommunal_pretax');
+    get_tax(frm, "viewATVAT_083", 'import_charge_pretax');
+    // reverse charge
+    get_tax(frm, "viewATVAT_057", 'tax_057');
+    get_tax(frm, "viewATVAT_066", 'taxation_pretax');
     
     // Recalculate
     update_total_revenue(frm);
@@ -225,10 +238,9 @@ function update_tax_due(frm) {
 function get_total(frm, view, target) {
     // total revenues is the sum of all base grnad totals in the period
     frappe.call({
-        method: 'erpnextaustria.erpnextaustria.doctype.at_vat_declaration.at_vat_declaration.get_view_total',
+        method: 'get_view_total',
+        doc: frm.doc, 
         args: { 
-            start_date: frm.doc.start_date,
-            end_date: frm.doc.end_date,
             view_name: view
         },
         callback: function(r) {
@@ -245,10 +257,9 @@ function get_total(frm, view, target) {
 function get_tax(frm, view, target) {
     // total tax is the sum of all taxes in the period
     frappe.call({
-        method: 'erpnextaustria.erpnextaustria.doctype.at_vat_declaration.at_vat_declaration.get_view_tax',
+        method: 'get_view_tax',
+        doc: frm.doc,
         args: { 
-            start_date: frm.doc.start_date,
-            end_date: frm.doc.end_date,
             view_name: view
         },
         callback: function(r) {
@@ -257,4 +268,30 @@ function get_tax(frm, view, target) {
             }
         }
     }); 
+}
+
+/* download xml form */
+function download_xml(frm) {
+    // generate U30 xml file
+    frappe.call({
+        method: 'generate_transfer_file',
+        doc: frm.doc,
+        callback: function(r) {
+            if (r.message) {
+                // prepare the xml file for download
+                var today = new Date();
+                download("u30_" + today.getFullYear() + "-" + today.getMonth() + ".xml", r.message.content);
+            } 
+        }
+    });    
+}
+
+function download(filename, content) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(content));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
 }

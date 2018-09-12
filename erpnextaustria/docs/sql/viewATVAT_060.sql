@@ -12,7 +12,7 @@ UNION SELECT
 	`tabExpense Claim`.`posting_date` AS `posting_date`, 
     `tabExpense Claim`.`name` AS `name`, 
     `tabExpense Claim`.`total_claimed_amount`  AS `base_grand_total`, 
-    `tabExpense Claim`.`total_claimed_amount`  AS `base_net_total`, 
+    (`tabExpense Claim`.`total_claimed_amount` - `tabExpense Claim`.`total_taxes_and_charges`) AS `base_net_total`,
     `tabExpense Claim`.`taxes_and_charges` AS `taxes_and_charges`, 
     `tabExpense Claim`.`total_taxes_and_charges` AS `total_taxes_and_charges`
 FROM `tabExpense Claim`
