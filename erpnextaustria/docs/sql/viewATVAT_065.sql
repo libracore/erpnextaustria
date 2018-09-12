@@ -5,15 +5,6 @@ SELECT
     `tabPurchase Invoice`.`base_grand_total`  AS `base_grand_total`, 
     `tabPurchase Invoice`.`base_net_total` AS `base_net_total`,
     `tabPurchase Invoice`.`taxes_and_charges` AS `taxes_and_charges`, 
-    `tabPurchase Invoice`.`total_taxes_and_charges` AS `total_taxes_and_charges`
+    (`tabPurchase Invoice`.`base_net_total` * 0.2) AS `total_taxes_and_charges`
 FROM `tabPurchase Invoice` 
-WHERE `docstatus` = 1 AND `taxes_and_charges` LIKE '%065%'
-UNION SELECT 
-	`tabExpense Claim`.`posting_date` AS `posting_date`, 
-    `tabExpense Claim`.`name` AS `name`, 
-    `tabExpense Claim`.`total_claimed_amount`  AS `base_grand_total`, 
-    (`tabExpense Claim`.`total_claimed_amount` - `tabExpense Claim`.`total_taxes_and_charges`) AS `base_net_total`,
-    `tabExpense Claim`.`taxes_and_charges` AS `taxes_and_charges`, 
-    `tabExpense Claim`.`total_taxes_and_charges` AS `total_taxes_and_charges`
-FROM `tabExpense Claim`
 WHERE `docstatus` = 1 AND `taxes_and_charges` LIKE '%065%'
