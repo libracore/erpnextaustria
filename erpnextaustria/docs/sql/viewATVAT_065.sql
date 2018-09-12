@@ -7,7 +7,7 @@ SELECT
     `tabPurchase Invoice`.`taxes_and_charges` AS `taxes_and_charges`, 
     `tabPurchase Invoice`.`total_taxes_and_charges` AS `total_taxes_and_charges`
 FROM `tabPurchase Invoice` 
-WHERE `docstatus` = 1 AND `taxes_and_charges` LIKE '%060%'
+WHERE `docstatus` = 1 AND `taxes_and_charges` LIKE '%065%'
 UNION SELECT 
 	`tabExpense Claim`.`posting_date` AS `posting_date`, 
     `tabExpense Claim`.`name` AS `name`, 
