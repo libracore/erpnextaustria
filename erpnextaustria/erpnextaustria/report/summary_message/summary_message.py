@@ -39,7 +39,8 @@ def get_data(month, year):
         year2 = year + 1
     else:
         year2 = year
-            # prepare query
+    
+    # prepare query
     sql_query = """SELECT 
           SUBSTRING(`tabCustomer`.`tax_id`, 1, 2) AS `country`,
           `tabCustomer`.`tax_id` AS `tax_id`, 
