@@ -9,7 +9,7 @@ frappe.query_reports["Summary Message"] = {
             "label": __("Month"),
             "fieldtype": "Int",
             "reqd": 1,
-            "default": new Date().getMonth()
+            "default": (new Date().getMonth() + 1)
         },
         {
             "fieldname":"year",
