@@ -70,40 +70,44 @@ class ATVATDeclaration(Document):
     #except:
     #    frappe.throw( _("Error while generating xml. Make sure that you made required customisations to the DocTypes.") )
     #    return
-    
-    def get_view_total(self, view_name):
-        """ executes a tax lookup query for a total 
-        
-        """
-        sql_query = ("""SELECT IFNULL(SUM(`base_net_total`), 0) AS `total` 
-                FROM `{0}` 
-                WHERE `posting_date` >= '{1}' 
-                AND `posting_date` <= '{2}'""".format(view_name, self.start_date, self.end_date))
-        total = frappe.db.sql(sql_query, as_dict=True)
-        return { 'total': total[0].total }
-
-    def get_view_tax(self, view_name):
-        """ executes a tax lookup query for a tax 
-        
-        """
-        sql_query = ("""SELECT IFNULL(SUM(`total_taxes_and_charges`), 0) AS `total` 
-                FROM `{0}` 
-                WHERE `posting_date` >= '{1}' 
-                AND `posting_date` <= '{2}'""".format(view_name, self.start_date, self.end_date))
-        total = frappe.db.sql(sql_query, as_dict=True)
-        return { 'total': total[0].total }
-      
-    def get_tax_rate(self, taxes_and_charges_template):
-        sql_query = ("""SELECT `rate` 
-            FROM `tabPurchase Taxes and Charges` 
-            WHERE `parent` = '{0}' 
-            ORDER BY `idx`;""".format(taxes_and_charges_template))
-        result = frappe.db.sql(sql_query, as_dict=True)
-        if result:
-            return result[0].rate
-        else:
-            return 0
 
 # adds Windows-compatible line endings (to make the xml look nice)    
 def make_line(line):
     return line + "\r\n"
+
+# note: do not move below functions into the class, otherwise, saving values will be impossible
+@frappe.whitelist()
+def get_view_total(view_name, start_date, end_date):
+	""" executes a tax lookup query for a total 
+	
+	"""
+	sql_query = ("""SELECT IFNULL(SUM(`base_grand_total`), 0) AS `total` 
+			FROM `{0}` 
+			WHERE `posting_date` >= '{1}' 
+			AND `posting_date` <= '{2}'""".format(view_name, start_date, end_date))
+	total = frappe.db.sql(sql_query, as_dict=True)
+	return { 'total': total[0].total }
+
+@frappe.whitelist()
+def get_view_tax(view_name, start_date, end_date):
+	""" executes a tax lookup query for a tax 
+	
+	"""
+	sql_query = ("""SELECT IFNULL(SUM(`total_taxes_and_charges`), 0) AS `total` 
+			FROM `{0}` 
+			WHERE `posting_date` >= '{1}' 
+			AND `posting_date` <= '{2}'""".format(view_name, start_date, end_date))
+	total = frappe.db.sql(sql_query, as_dict=True)
+	return { 'total': total[0].total }
+  
+@frappe.whitelist()
+def get_tax_rate(taxes_and_charges_template):
+    sql_query = ("""SELECT `rate` 
+        FROM `tabPurchase Taxes and Charges` 
+        WHERE `parent` = '{0}' 
+        ORDER BY `idx`;""".format(taxes_and_charges_template))
+    result = frappe.db.sql(sql_query, as_dict=True)
+    if result:
+        return result[0].rate
+    else:
+        return 0
