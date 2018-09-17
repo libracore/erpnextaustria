@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2017-2018, libracore and contributors
 # For license information, please see license.txt
 
