@@ -78,7 +78,7 @@ def execute(filters=None):
         data = frappe.db.sql(sql_query, as_list = True)
         return data
 
-    @frappe.whitelist()
+@frappe.whitelist()
 def generate_transfer_file(month, year):    
     # fetch data
     data = get_data(int(month), int(year))
