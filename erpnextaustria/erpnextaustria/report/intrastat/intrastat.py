@@ -85,7 +85,7 @@ def generate_transfer_file(month, year):
     data = get_data(int(month), int(year))
     
     # create csv header
-    content = makeline("KN8-Code;Art des Geschäftes;Statistisches Verfahren;Warenbezeichnung;Handelspartnerland;Ursprungsland;Eigenmasse;Besondere Maßeinheit;Verkehrszweig;Rechnungsbetrag;Statistischer Wert")
+    content = make_line("KN8-Code;Art des Geschäftes;Statistisches Verfahren;Warenbezeichnung;Handelspartnerland;Ursprungsland;Eigenmasse;Besondere Maßeinheit;Verkehrszweig;Rechnungsbetrag;Statistischer Wert")
     for i in range(0, len(data)):
         content += make_line("{kn8};{type};{stat};{item_name};{supl_cntry};{source_cntry};{uom};{spec_uom};{traffic};{amount};{value}".format(
             type="1",
