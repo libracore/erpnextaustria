@@ -41,7 +41,7 @@ function download_csv(report) {
             if (r.message) {
                 // prepare the xml file for download
                 var today = new Date();
-                download("intrastat_" + today.getFullYear() + "-" + today.getMonth() + ".csv", r.message.content);
+                download("intrastat_" + today.getFullYear() + "-" + (today.getMonth() + 1) + ".csv", r.message.content);
             } 
         }
     });   
