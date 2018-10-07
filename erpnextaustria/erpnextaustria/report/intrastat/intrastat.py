@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2017-2018, libracore and contributors
 # For license information, please see license.txt
 
@@ -11,6 +12,7 @@ def execute(filters=None):
     # prepare columns
     columns = [
         "Item:Link/Item:150", 
+        "Item Name::200",
         "KN8 Code::100", 
         "Vers. Land::100", 
         "Ursp. Land::100", 
@@ -20,7 +22,6 @@ def execute(filters=None):
         "Stat. Wert::100"
     ]
 
-    # prepare filters
     # prepare filters
     today = datetime.today()
     if filters.month:
@@ -39,9 +40,23 @@ def execute(filters=None):
     else:
         year2 = year
         
+    data = get_data(month, year)
+
+    return columns, data
+
+def get_data(month, year):
+    # prepare timeframe
+    month2 = month + 1
+    if month2 > 12:
+        month2 = month2 - 12
+        year2 = year + 1
+    else:
+        year2 = year
+    
     # prepare query
     sql_query = """SELECT 
           `tabPurchase Invoice Item`.`item_code`,
+          `tabPurchase Invoice Item`.`item_name`,
           `tabItem`.`customs_tariff_number` AS `KN8 Code`,
           (SELECT `code` FROM `tabCountry` WHERE `tabCountry`.`name` = 
            (SELECT `country` FROM `tabAddress` WHERE `tabAddress`.`name` = `tabPurchase Invoice`.`supplier_address`)
@@ -62,6 +77,32 @@ def execute(filters=None):
 
     # run query, as list, otherwise export to Excel fails 
     data = frappe.db.sql(sql_query, as_list = True)
+    return data
 
-    return columns, data
+@frappe.whitelist()
+def generate_transfer_file(month, year):    
+    # fetch data
+    data = get_data(int(month), int(year))
+    
+    # create csv header
+    content = make_line("KN8-Code;Art des Geschäftes;Statistisches Verfahren;Warenbezeichnung;Handelspartnerland;Ursprungsland;Eigenmasse;Besondere Maßeinheit;Verkehrszweig;Rechnungsbetrag;Statistischer Wert")
+    for i in range(0, len(data)):
+        content += make_line("{kn8};{type};{stat};{item_name};{supl_cntry};{source_cntry};{uom};{spec_uom};{traffic};{amount};{value}".format(
+            type="1",
+            stat="40000",
+            kn8=data[i][2],
+            item_name=data[i][1],
+            supl_cntry=data[i][3],
+            source_cntry=data[i][4],
+            uom=data[i][5],
+            spec_uom=data[i][6],
+            traffic="3",
+            amount=data[i][7],
+            value=data[i][8]
+        ))
+ 
+    return { 'content': content }
 
+# adds Windows-compatible line endings (to make the xml look nice)    
+def make_line(line):
+    return line + "\r\n"

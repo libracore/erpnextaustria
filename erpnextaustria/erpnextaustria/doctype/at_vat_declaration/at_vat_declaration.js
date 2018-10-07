@@ -15,7 +15,11 @@ frappe.ui.form.on('AT VAT Declaration', {
 		{
 			download_xml(frm);
 		});
-        
+        frm.add_custom_button(__("Show data"), function() 
+		{
+			console.log(frm.doc);
+		});     
+           
         if (frm.doc.__islocal) {
             // this function is called when a new VAT declaration is created
             // get current month (0..11)
@@ -46,6 +50,9 @@ frappe.ui.form.on('AT VAT Declaration', {
         
         // recalculate fresh values
         update_total_revenue(frm);
+    },
+    validate: function(frm) {
+        console.log(frm.doc);
     }
 });
 
@@ -136,9 +143,9 @@ function update_total_revenue(frm) {
         - float(frm.doc.taxfree_intercommunal);
     frm.set_value('total_intercommunal', total_inter_revenue); 
         
-    cur_frm.refresh_field('total_revenue', 'total_intercommunal');
+    cur_frm.refresh_fields('total_revenue', 'total_intercommunal');
     // cascade change: recalculate total amount
-    update_total_amount(frm);
+    update_total_amount(frm); 
     
 }
 
@@ -155,7 +162,7 @@ function update_total_amount(frm) {
         - float(frm.doc.taxfree_revenue);
     frm.set_value('total_amount', total_amount);    
     
-    cur_frm.refresh_field('total_amount');
+    cur_frm.refresh_fields('total_amount');
     // cascade change: taxes
     update_tax_amounts(frm);
 }
@@ -173,7 +180,7 @@ function update_tax_amounts(frm) {
     frm.set_value('tax_inter_reduced_2', (0.13) * float(frm.doc.amount_inter_reduced_2));
     frm.set_value('tax_inter_reduced_3', (0.19) * float(frm.doc.amount_inter_reduced_3));
     
-    cur_frm.refresh_field('tax_normal', 
+    cur_frm.refresh_fields('tax_normal', 
         'tax_reduced_rate_1', 
         'tax_reduced_rate_2', 
         'tax_reduced_rate_3', 
@@ -204,7 +211,7 @@ function update_pretax(frm) {
         + float(frm.doc.corrections_2);
     frm.set_value('total_deductable_pretax', total_pretax);    
     
-    cur_frm.refresh_field('total_deductable_pretax');
+    cur_frm.refresh_fields('total_deductable_pretax');
     // cascade change: taxes
     update_tax_due(frm);
 }
@@ -228,8 +235,8 @@ function update_tax_due(frm) {
         + float(frm.doc.tax_inter_reduced_3)
         - float(frm.doc.total_deductable_pretax)
         + float(frm.doc.tax_other_corrections);
-    frm.set_value('total_tax_due', total_tax_due);    
-    cur_frm.refresh_field('total_tax_due');
+    cur_frm.set_value('total_tax_due', total_tax_due);    
+    cur_frm.refresh_fields('total_tax_due');
 }
 
 /* view: view to use
@@ -238,9 +245,10 @@ function update_tax_due(frm) {
 function get_total(frm, view, target) {
     // total revenues is the sum of all base grnad totals in the period
     frappe.call({
-        method: 'get_view_total',
-        doc: frm.doc, 
+        method: 'erpnextaustria.erpnextaustria.doctype.at_vat_declaration.at_vat_declaration.get_view_total',
         args: { 
+            start_date: frm.doc.start_date,
+            end_date: frm.doc.end_date,
             view_name: view
         },
         callback: function(r) {
@@ -257,9 +265,10 @@ function get_total(frm, view, target) {
 function get_tax(frm, view, target) {
     // total tax is the sum of all taxes in the period
     frappe.call({
-        method: 'get_view_tax',
-        doc: frm.doc,
+        method: 'erpnextaustria.erpnextaustria.doctype.at_vat_declaration.at_vat_declaration.get_view_tax',
         args: { 
+            start_date: frm.doc.start_date,
+            end_date: frm.doc.end_date,
             view_name: view
         },
         callback: function(r) {
