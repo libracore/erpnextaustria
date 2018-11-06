@@ -4,6 +4,7 @@
 
 # imports
 import frappe
+from frappe import _
 from zeep import Client
 
 # UID validation
@@ -11,10 +12,21 @@ from zeep import Client
 # Returns a dict with the attribute 'valid' = "True" or "False"
 @frappe.whitelist()
 def check_uid(uid):
-    client = Client('http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl')
-    result = client.service.checkVat(uid[0:2], uid[2:])
+    try:
+        result = vat_request(uid)
+    except:
+        try:
+            # second try
+            result = vat_request(uid)
+        except Exception e:
+            frappe.throw( _("Unable to validate UID. Please try again in a few seconds.") )
     return result.valid
 
+def vat_request(uid):
+    client = Client('http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl')
+    result = client.service.checkVat(uid[0:2], uid[2:])
+    return result
+        
 # Creation of ebInterface invoice file (following ebInterface 5.0)
 #
 # Returns an XML-File for a Sales Invoice
