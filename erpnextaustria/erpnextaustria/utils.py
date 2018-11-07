@@ -52,7 +52,7 @@ def create_ebinterface_xml(sinv):
         except:
             frappe.throw(_("Unable to find delivery note"))
         try:
-            sales_order = frappe.get_doc("Delivery Note", sales_invoice.items[0].sales_order)
+            sales_order = frappe.get_doc("Sales Order", sales_invoice.items[0].sales_order)
         except:
             frappe.throw(_("Unable to find sales order"))        
         content += make_line("  <Delivery>")
