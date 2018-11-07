@@ -18,7 +18,7 @@ def check_uid(uid):
         try:
             # second try
             result = vat_request(uid)
-        except Exception e:
+        except Exception as e:
             frappe.throw( _("Unable to validate UID. Please try again in a few seconds.") )
     return result.valid
 
