@@ -88,20 +88,24 @@ def create_ebinterface_xml(sinv):
         content += make_line("      <Name>{0}</Name>".format(owner.full_name))
         content += make_line("    </Contact>")
         # Die Lieferantennummer/Kreditorennummer: 
-        content += make_line("    <InvoiceRecipientsBillerID>0011025781</InvoiceRecipientsBillerID>")
+        customer = frappe.get_doc("Customer", sales_invoice.customer)
+        if not customer.lieferantennummer:
+            frappe.throw( _("Customer does not have a supplier number. Please add your supplier number to the customer record.") )
+        content += make_line("    <InvoiceRecipientsBillerID>{0}</InvoiceRecipientsBillerID>".format(customer.lieferantennummer))
         content += make_line("  </Biller>")
         # Rechnungsempfänger 
         content += make_line("  <InvoiceRecipient>")
-        customer = frappe.get_doc("Customer", sales_invoice.customer)
         content += make_line("    <VATIdentificationNumber>{0}</VATIdentificationNumber>".format(customer.tax_id))
         #content += make_line("    <FurtherIdentification IdentificationType=\"FS\">Wien</FurtherIdentification>")
         #content += make_line("    <FurtherIdentification IdentificationType=\"FN\">12345678</FurtherIdentification>")
         #content += make_line("    <FurtherIdentification IdentificationType=\"FBG\">Handelsgericht Wien</FurtherIdentification>")
         # Die Auftragsreferenz:
         content += make_line("    <OrderReference>")
-        content += make_line("      <OrderID>{0}</OrderID>".format(sales_order.po_no))
+        if not customer.auftragsreferenz:
+            frappe.throw( _("Customer does not have an order reference. Please add your order reference to the customer record.") )
+        content += make_line("      <OrderID>{0}</OrderID>".format(customer.auftragsreferenz))
         content += make_line("      <ReferenceDate>{0}</ReferenceDate>".format(sales_order.posting_date))
-        #content += make_line("      <Description>Bestellung neuer Bedarfsmittel</Description>")
+        content += make_line("      <Description>{0}</Description>".format(sales_order.po_no or ""))
         content += make_line("    </OrderReference>")
         customer_address = frappe.get_doc("Address", sales_invoice.customer_address)
         customer_country = frappe.get_doc("Country", customer_address.country)
