@@ -210,7 +210,8 @@ function update_pretax(frm) {
         + float(frm.doc.corrections_1)
         + float(frm.doc.corrections_2);
     frm.set_value('total_deductable_pretax', total_pretax);    
-    
+
+    // deduction is a negative value
     cur_frm.refresh_fields('total_deductable_pretax');
     // cascade change: taxes
     update_tax_due(frm);
@@ -233,9 +234,10 @@ function update_tax_due(frm) {
         + float(frm.doc.tax_inter_reduced_1)
         + float(frm.doc.tax_inter_reduced_2)
         + float(frm.doc.tax_inter_reduced_3)
-        - float(frm.doc.total_deductable_pretax)
+        + float(frm.doc.total_deductable_pretax) // deduction: negative value
         + float(frm.doc.tax_other_corrections);
-    cur_frm.set_value('total_tax_due', total_tax_due);    
+    cur_frm.set_value('total_tax_due', total_tax_due);
+
     cur_frm.refresh_fields('total_tax_due');
 }
 
