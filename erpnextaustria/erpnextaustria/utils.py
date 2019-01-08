@@ -32,7 +32,7 @@ def vat_request(uid):
 # Returns an XML-File for a Sales Invoice
 @frappe.whitelist()
 def create_ebinterface_xml(sinv):
-    #try:
+    try:
         sales_invoice = frappe.get_doc("Sales Invoice", sinv)
 
         # create xml header
@@ -59,7 +59,7 @@ def create_ebinterface_xml(sinv):
         try:
             content += make_line("    <Date>{0}</Date>".format(delivery_note.posting_date))
         except:
-            content += make_line("    <!-- no linked delivery -->")
+            content += make_line("    <Date>{0}</Date>".format(sales_invoice.posting_date))
         content += make_line("    <Address>")
         content += make_line(u"      <Name>{0}</Name>".format(sales_invoice.company))
         content += make_line(u"      <Street>{0}</Street>".format(company_address.address_line1))
@@ -77,6 +77,10 @@ def create_ebinterface_xml(sinv):
         content += make_line("  <Biller>")
         company = frappe.get_doc("Company", sales_invoice.company)
         content += make_line("    <VATIdentificationNumber>{0}</VATIdentificationNumber>".format(company.tax_id))
+        # Zusätzliche Lieferanteninformationen
+        content += make_line(u"    <FurtherIdentification IdentificationType=\"FS\">{0}</FurtherIdentification>".format(company.firmensitz))
+        content += make_line(u"    <FurtherIdentification IdentificationType=\"FN\">{0}</FurtherIdentification>".format(company.firmenbuchnummer))
+        content += make_line(u"    <FurtherIdentification IdentificationType=\"FBG\">{0}</FurtherIdentification>".format(company.firmenbuchgericht))
         content += make_line("    <Address>")
         content += make_line(u"      <Name>{0}</Name>".format(sales_invoice.company))
         content += make_line(u"      <Street>{0}</Street>".format(company_address.address_line1))
@@ -99,9 +103,6 @@ def create_ebinterface_xml(sinv):
         # Rechnungsempfänger 
         content += make_line("  <InvoiceRecipient>")
         content += make_line(u"    <VATIdentificationNumber>{0}</VATIdentificationNumber>".format(customer.tax_id))
-        #content += make_line("    <FurtherIdentification IdentificationType=\"FS\">Wien</FurtherIdentification>")
-        #content += make_line("    <FurtherIdentification IdentificationType=\"FN\">12345678</FurtherIdentification>")
-        #content += make_line("    <FurtherIdentification IdentificationType=\"FBG\">Handelsgericht Wien</FurtherIdentification>")
         # Die Auftragsreferenz:
         content += make_line("    <OrderReference>")
         if not customer.auftragsreferenz:
@@ -145,9 +146,8 @@ def create_ebinterface_xml(sinv):
             content += make_line(u"        <Quantity Unit=\"{0}\">{1}</Quantity>".format(item.uom, item.qty))
             content += make_line(u"        <UnitPrice>{0}</UnitPrice>".format(item.rate))
             content += make_line("        <InvoiceRecipientsOrderReference>")
-            if item.sales_order:
-                content += make_line(u"          <OrderID>{0}</OrderID>".format(item.sales_order))
-            content += make_line("          <OrderPositionNumber>1</OrderPositionNumber>")
+            content += make_line(u"         <OrderID>{0}</OrderID>".format(customer.auftragsreferenz))
+            content += make_line("          <OrderPositionNumber>{0}</OrderPositionNumber>".format(loop.index))
             content += make_line("        </InvoiceRecipientsOrderReference>")
             content += make_line("        <TaxItem>")
             content += make_line("          <TaxableAmount>{0}</TaxableAmount>".format(item.amount))
@@ -168,7 +168,7 @@ def create_ebinterface_xml(sinv):
             content += make_line("    </TaxItem>")
             content += make_line("  </Tax>")
         content += make_line("  <TotalGrossAmount>{0}</TotalGrossAmount>".format(sales_invoice.grand_total))
-        content += make_line("  <PayableAmount>{0}</PayableAmount>".format(sales_invoice.rounded_total))
+        content += make_line("  <PayableAmount>{0}</PayableAmount>".format(sales_invoice.grand_total))
         content += make_line("  <PaymentMethod>")
         content += make_line("    <Comment>Wir ersuchen um termingerechte Bezahlung.</Comment>")
         content += make_line("    <UniversalBankTransaction>")
@@ -191,9 +191,9 @@ def create_ebinterface_xml(sinv):
         #content += make_line("  <Comment>Globaler Kommentar zur Rechnung.</Comment>")
         content += make_line("</Invoice>")
         return { 'content': content }
-    #except Exception as err:
-    #    frappe.throw( _("Error while generating xml. Make sure that you made required customisations to the DocTypes. {0}").format(err.message) )
-    #    return
+    except Exception as err:
+        frappe.throw( _("Error while generating xml. Make sure that you made required customisations to the DocTypes. {0}").format(err.message) )
+        return
 
 # adds Windows-compatible line endings (to make the xml look nice)    
 def make_line(line):
