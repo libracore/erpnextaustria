@@ -140,6 +140,7 @@ def create_ebinterface_xml(sinv):
         #content += make_line("    <HeaderDescription>Optionaler Kopftext für alle Details</HeaderDescription>")
         content += make_line("    <ItemList>")
         #content += make_line("      <HeaderDescription>Optionaler Kopftext für diese ItemList</HeaderDescription>")
+        index = 1
         for item in sales_invoice.items:
             content += make_line("      <ListLineItem>")
             content += make_line(u"        <Description>{0}</Description>".format(item.item_name))
@@ -147,7 +148,7 @@ def create_ebinterface_xml(sinv):
             content += make_line(u"        <UnitPrice>{0}</UnitPrice>".format(item.rate))
             content += make_line("        <InvoiceRecipientsOrderReference>")
             content += make_line(u"         <OrderID>{0}</OrderID>".format(customer.auftragsreferenz))
-            content += make_line("          <OrderPositionNumber>{0}</OrderPositionNumber>".format(loop.index))
+            content += make_line("          <OrderPositionNumber>{0}</OrderPositionNumber>".format(index))
             content += make_line("        </InvoiceRecipientsOrderReference>")
             content += make_line("        <TaxItem>")
             content += make_line("          <TaxableAmount>{0}</TaxableAmount>".format(item.amount))
@@ -155,6 +156,7 @@ def create_ebinterface_xml(sinv):
             content += make_line("        </TaxItem>")
             content += make_line("        <LineItemAmount>{0}</LineItemAmount>".format(item.amount))   
             content += make_line("      </ListLineItem>")
+            index += 1
         #content += make_line("      <FooterDescription>Optionaler Fusstext für diese ItemList</FooterDescription>")
         content += make_line("    </ItemList>")
         #content += make_line("    <FooterDescription>Optionaler Fusstext für alle Details</FooterDescription>")
