@@ -100,7 +100,7 @@ def generate_transfer_file(month, year):
     for i in range(0, len(data)):
         content += make_line("  <ZM>")
         content += make_line("  <UID_MS>{0}</UID_MS>".format(data[i][1]))
-        content += make_line("  <SUM_BGL type=\"kz\">{0}</SUM_BGL>".format(data[i][2]))
+        content += make_line("  <SUM_BGL type=\"kz\">{0:00d}</SUM_BGL>".format(int(data[i][2])))
         content += make_line("  <SOLEI>{0}</SOLEI>".format(data[i][3]))
         content += make_line("  </ZM>")
     content += make_line(" </ERKLAERUNG>")
