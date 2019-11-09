@@ -7,7 +7,7 @@ def get_data():
 		{
 			"module_name": "ERPNextAustria",
 			"color": "#627f43",
-			"icon": "octicon octicon-globe",
+			"icon": "icon erpnextaustria-blue",
 			"type": "module",
 			"label": _("ERPNextAustria")
 		}
