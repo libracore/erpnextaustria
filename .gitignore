@@ -4,3 +4,4 @@
 *.swp
 tags
 erpnextaustria/docs/current
+__pycache__
