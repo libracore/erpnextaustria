@@ -6,6 +6,8 @@
 import frappe
 from frappe import _
 from zeep import Client
+import requests
+from bs4 import BeautifulSoup
 
 # UID validation
 #
@@ -198,3 +200,37 @@ def create_ebinterface_xml(sinv):
 # adds Windows-compatible line endings (to make the xml look nice)    
 def make_line(line):
     return line + "\r\n"
+
+@frappe.whitelist()
+def get_eur_exchange_rate(currency):
+    url = "https://www.oenb.at/zinssaetzewechselkurse/zinssaetzewechselkurse?mode=wechselkurse"
+    page = requests.get(url)
+    if page.status_code == 200:
+        # all good, parse
+        soup = BeautifulSoup(page.text, 'lxml')
+        # find all currency nodes
+        currency_rows = soup.find_all('tr', class_='text')
+        # evaluate each node
+        for cr in currency_rows:
+            # parse fields
+            fields = cr.find_all('td')
+            # only use rows with 3 cells
+            if len(fields) == 3:
+                # parse currency code and exchange rate
+                try:
+                    currency_code = fields[1].get_text().replace('\n', '').replace('\r', '').replace('\t', '')
+                    raw = fields[2].get_text().replace('\n', '').replace('\r', '').replace('\t', '').replace('.', '').replace(',', '.')
+                    exchange_rate = float(raw)
+                    # return if matched
+                    print("{0}: 1 EUR = {1} {0}".format(currency_code, exchange_rate))
+                    if currency.lower() == currency_code.lower():
+                        return exchange_rate
+                except:
+                    print("parsing error {0}".format(raw))
+                    # skip errors, probably an illegal row (like header)
+                    pass
+    else:
+        # failed
+        frappe.log_error("Unable to get exchange rate (error code {0})".format(page.status_code), 
+            "Get exchange rate failed")
+    return
