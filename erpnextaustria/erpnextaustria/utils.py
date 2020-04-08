@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Fink Zeitsysteme/libracore and contributors
 # For license information, please see license.txt
+#
+# Import exchange rates
+#  $ bench execute erpnextaustria.erpnextaustria.utils.read_exchange_rates --kwargs "{'currencies': ['CHF']}"
+#
 
 # imports
 import frappe
@@ -8,6 +12,7 @@ from frappe import _
 from zeep import Client
 import requests
 from bs4 import BeautifulSoup
+from time import strftime
 
 # UID validation
 #
@@ -234,3 +239,30 @@ def get_eur_exchange_rate(currency):
         frappe.log_error("Unable to get exchange rate (error code {0})".format(page.status_code), 
             "Get exchange rate failed")
     return
+
+def read_exchange_rates(currencies=["CHF"]):
+    for c in currencies:
+        rate = get_eur_exchange_rate(c)
+        create_exchange_rate(c, rate)
+    return
+    
+def create_exchange_rate(from_currency, rate, to_currency="EUR"):
+    # insert a new record in ERPNext
+    # Exchange Rate (1 EUR = [?] from_currency)
+    date = strftime("%Y-%m-%d")
+    new_exchange_rate = frappe.get_doc({
+        'doctype': "Currency Exchange",
+        'date': date,
+        'from_currency': from_currency,
+        'to_currency': to_currency,
+        'exchange_rate': rate
+    })
+    try:
+        record = new_exchange_rate.insert()  
+    except frappe.exceptions.DuplicateEntryError:
+        print("There is already an exchange rate for {0} on {1}".format(from_currency, date))
+        record = None
+    except Exception as err:
+        print(err.message)
+        record = None
+    return record
