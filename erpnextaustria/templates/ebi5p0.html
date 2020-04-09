@@ -48,28 +48,28 @@
       {% if sales_order -%}
       <ReferenceDate>{{ sales_order.posting_date }}</ReferenceDate>
       <Description>{{ sales_order.po_no or "" }}</Description>
-      {% endif -%}
+    {% endif -%}
     </OrderReference>
-    <Address>")
+    <Address>
       <Name>{{ sales_invoice.customer_name }}</Name>
       <Street>{{ customer.address_line1 }}</Street>
       <Town>{{ customer.city }}</Town>
       <ZIP>{{ customer.pincode }}</ZIP>
       <Country CountryCode="{{ customer.country_code }}">{{ customer.country_name }}</Country>
       {% if contact.phone %}<Phone>{{ contact.phone }}</Phone>{% endif -%}
-      <Email>{{ ontact.email_id }}</Email>
-    </Address>")
-    <Contact>")
+      <Email>{{ contact.email_id }}</Email>
+    </Address>
+    <Contact>
       {% if contact.salutation %}<Salutation>{{ contact.salutation }}</Salutation>{% endif -%}
       <Name>{{ contact.first_name or "" }} {{ contact.last_name or "" }}</Name>
-    </Contact>")
+    </Contact>
   </InvoiceRecipient>
-  <Details>")
+  <Details>
     {% if header_description %}<HeaderDescription>{{ header_description }}</HeaderDescription>{% endif -%}
     <ItemList>
       {% if item_header_description %}<HeaderDescription>{{ item_header_description }}</HeaderDescription>{% endif -%}
-      {% for item in sales_invoice.items -%}
-      <ListLineItem>")
+      {% for item in items -%}
+      <ListLineItem>
         <Description>{{ item.item_name }}</Description>
         <Quantity Unit="{{ item.uom }}">{{ item.qty }}</Quantity>
         <UnitPrice>{{ item.rate }}</UnitPrice>
@@ -85,10 +85,10 @@
       </ListLineItem>
       {% endfor -%}
       {% if footer_description %}<FooterDescription>{{ footer_description }}</FooterDescription>{% endif -%}
-    </ItemList>")
+    </ItemList>
     {% if item_footer_description %}<FooterDescription>{{ item_footer_description }}</FooterDescription>{% endif -%}
   </Details>
-  {% for tax in sales_invoice.taxes -%}
+  {% for tax in taxes -%}
   <Tax>
     <TaxItem>
       <TaxableAmount>{{ sales_invoice.net_total }}</TaxableAmount>
@@ -118,4 +118,4 @@
     <!-- <Comment>Kommentar zu den Zahlungsbedingungen</Comment> -->
   </PaymentConditions>
   <!-- <Comment>Globaler Kommentar zur Rechnung.</Comment> -->
-</Invoice>"
+</Invoice>

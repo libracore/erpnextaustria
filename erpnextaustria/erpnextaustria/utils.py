@@ -39,7 +39,7 @@ def vat_request(uid):
 # Returns an XML-File for a Sales Invoice
 @frappe.whitelist()
 def create_ebinterface_xml(sinv, with_details=1):
-    try:
+    if True: #try:
         # collect information
         sales_invoice = frappe.get_doc("Sales Invoice", sinv)
         try:
@@ -72,7 +72,7 @@ def create_ebinterface_xml(sinv, with_details=1):
             try:
                 so = frappe.get_doc("Sales Order", sales_invoice.items[0].sales_order)
                 sales_order = {
-                    'posting_date': so.posting_date
+                    'posting_date': so.posting_date,
                     'description': so.po_no or ""
                 }
             except:
@@ -81,12 +81,13 @@ def create_ebinterface_xml(sinv, with_details=1):
             sales_order = None
         contact = frappe.get_doc("Contact", sales_invoice.contact_person)
         # bank account
+        company = frappe.get_doc("Company", sales_invoice.company)
         bank_account = frappe.get_doc("Account", company.default_bank_account)
-        
+
         # create xml header
         data = {
             'sales_invoice': {
-                'name': sales_invoice.name
+                'name': sales_invoice.name,
                 'posting_date': sales_invoice.posting_date,
                 'company': sales_invoice.company,
                 'owner': sales_invoice.owner,
@@ -102,7 +103,7 @@ def create_ebinterface_xml(sinv, with_details=1):
                 'address_line1': company_address.address_line1,
                 'city': company_address.city,
                 'pincode': company_address.pincode,
-                'country_code': company_country.code, 
+                'country_code': company_country.code,
                 'country_name': company_country.name,
                 'tax_id': company.tax_id,
                 'firmensitz': company.firmensitz,
@@ -120,19 +121,19 @@ def create_ebinterface_xml(sinv, with_details=1):
                 'address_line1': customer_address.address_line1,
                 'city': customer_address.city,
                 'pincode': customer_address.pincode,
-                'country_code': customer_country.code, 
+                'country_code': customer_country.code,
                 'country_name': customer_country.name
             },
             'sales_order': sales_order,
             'contact': {
                 'salutation': contact.salutation,
-                'first_name': contact.first_name, 
+                'first_name': contact.first_name,
                 'last_name': contact.last_name,
                 'phone': contact.phone,
                 'email_id': contact.email_id
             },
-            items: [],
-            taxes: [],
+            'items': [],
+            'taxes': [],
             'bank_account': {
                 'bic': bank_account.bic,
                 'iban': bank_account.iban
@@ -150,20 +151,20 @@ def create_ebinterface_xml(sinv, with_details=1):
                 'amount': item.amount,
                 'tax_percent': 20
             }
-            data.items.append(i)
+            data['items'].append(i)
         # add taxes
         for tax in sales_invoice.taxes:
             t = {
                 'rate': tax.rate,
                 'tax_amount': tax.tax_amount
             }
-            data.taxes.append(t)
+            data['taxes'].append(t)
         # render xml
         content = frappe.render_template('erpnextaustria/templates/ebi5p0.html', data)
         return { 'content': content }
-    except Exception as err:
-        frappe.throw( _("Error while generating xml. Make sure that you made required customisations to the DocTypes. {0}").format(err.message) )
-        return
+    #except Exception as err:
+    #    frappe.throw( _("Error while generating xml. Make sure that you made required customisations to the DocTypes. {0}").format(err.message) )
+    #    return
 
 # adds Windows-compatible line endings (to make the xml look nice)    
 def make_line(line):
