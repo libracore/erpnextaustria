@@ -24,9 +24,9 @@
   </Delivery>
   <Biller>
     <VATIdentificationNumber>{{ company.tax_id }}</VATIdentificationNumber>
-    <FurtherIdentification IdentificationType=\"FS\">{{ company.firmensitz }}</FurtherIdentification>
-    <FurtherIdentification IdentificationType=\"FN\">{{ company.firmenbuchnummer }}</FurtherIdentification>
-    <FurtherIdentification IdentificationType=\"FBG\">{{ company.firmenbuchgericht }}</FurtherIdentification>
+    <FurtherIdentification IdentificationType="FS">{{ company.firmensitz }}</FurtherIdentification>
+    <FurtherIdentification IdentificationType="FN">{{ company.firmenbuchnummer }}</FurtherIdentification>
+    <FurtherIdentification IdentificationType="FBG">{{ company.firmenbuchgericht }}</FurtherIdentification>
     <Address>
       <Name>{{ sales_invoice.company }}</Name>
       <Street>{{ company.address_line1 }}</Street>
@@ -61,13 +61,13 @@
     </Address>")
     <Contact>")
       {% if contact.salutation %}<Salutation>{{ contact.salutation }}</Salutation>{% endif -%}
-      <Name>{{ contact.first_name }} {{ contact.last_name }}</Name>
+      <Name>{{ contact.first_name or "" }} {{ contact.last_name or "" }}</Name>
     </Contact>")
   </InvoiceRecipient>
   <Details>")
-    <!-- <HeaderDescription>Optionaler Kopftext für alle Details</HeaderDescription> -->
+    {% if header_description %}<HeaderDescription>{{ header_description }}</HeaderDescription>{% endif -%}
     <ItemList>
-      <!-- <HeaderDescription>Optionaler Kopftext für diese ItemList</HeaderDescription> -->
+      {% if item_header_description %}<HeaderDescription>{{ item_header_description }}</HeaderDescription>{% endif -%}
       {% for item in sales_invoice.items -%}
       <ListLineItem>")
         <Description>{{ item.item_name }}</Description>
@@ -79,20 +79,20 @@
         </InvoiceRecipientsOrderReference>
         <TaxItem>
           <TaxableAmount>{{ item.amount }}</TaxableAmount>
-          <TaxPercent TaxCategoryCode=\"S\">20</TaxPercent>
+          <TaxPercent TaxCategoryCode="S">{{ item.tax_percent }}</TaxPercent>
         </TaxItem>
         <LineItemAmount>{{ item.amount }}</LineItemAmount> 
       </ListLineItem>
       {% endfor -%}
-      <!-- <FooterDescription>Optionaler Fusstext für diese ItemList</FooterDescription> -->
+      {% if footer_description %}<FooterDescription>{{ footer_description }}</FooterDescription>{% endif -%}
     </ItemList>")
-    <!-- <FooterDescription>Optionaler Fusstext für alle Details</FooterDescription> -->
+    {% if item_footer_description %}<FooterDescription>{{ item_footer_description }}</FooterDescription>{% endif -%}
   </Details>
   {% for tax in sales_invoice.taxes -%}
-  <Tax>")
-    <TaxItem>")
+  <Tax>
+    <TaxItem>
       <TaxableAmount>{{ sales_invoice.net_total }}</TaxableAmount>
-      <TaxPercent TaxCategoryCode=\"S\">{{ tax.rate }}</TaxPercent>
+      <TaxPercent TaxCategoryCode="S">{{ tax.rate }}</TaxPercent>
       <TaxAmount>{{ tax.tax_amount }}</TaxAmount>
     </TaxItem>
   </Tax>

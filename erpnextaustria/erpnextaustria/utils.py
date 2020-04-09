@@ -80,6 +80,8 @@ def create_ebinterface_xml(sinv, with_details=1):
         else:
             sales_order = None
         contact = frappe.get_doc("Contact", sales_invoice.contact_person)
+        # bank account
+        bank_account = frappe.get_doc("Account", company.default_bank_account)
         
         # create xml header
         data = {
@@ -88,7 +90,10 @@ def create_ebinterface_xml(sinv, with_details=1):
                 'posting_date': sales_invoice.posting_date,
                 'company': sales_invoice.company,
                 'owner': sales_invoice.owner,
-                'customer_name': sales_invoice.customer_name
+                'customer_name': sales_invoice.customer_name,
+                'net_total': sales_invoice.net_total,
+                'grand_total': sales_invoice.grand_total,
+                'due_date': sales_invoice.due_date
             },
             'delivery': {
                 'delivery_date': delivery_date
@@ -102,7 +107,9 @@ def create_ebinterface_xml(sinv, with_details=1):
                 'tax_id': company.tax_id,
                 'firmensitz': company.firmensitz,
                 'firmenbuchnummer': company.firmenbuchnummer,
-                'firmenbuchgericht': company.firmenbuchgericht
+                'firmenbuchgericht': company.firmenbuchgericht,
+                'name': company.name
+            },
             'owner': {
                 'full_name': owner.full_name
             },
@@ -118,79 +125,41 @@ def create_ebinterface_xml(sinv, with_details=1):
             },
             'sales_order': sales_order,
             'contact': {
-            
-
-
-
-
-        content += make_line(u"      <Name>{0}</Name>".format())
-        content += make_line(u"      <Street>{0}</Street>".format())
-        content += make_line(u"      <Town>{0}</Town>".format())
-        content += make_line(u"      <ZIP>{0}</ZIP>".format())
-        content += make_line(u"      <Country CountryCode=\"{0}\">{1}</Country>".format())
-        
-        content += make_line(u"      <Phone>{0}</Phone>".format(contact.phone))
-        content += make_line(u"      <Email>{0}</Email>".format(contact.email_id))
-        content += make_line("    </Address>")
-        content += make_line("    <Contact>")
-        content += make_line(u"      <Salutation>{0}</Salutation>".format(contact.salutation))
-        content += make_line(u"      <Name>{0} {1}</Name>".format(contact.first_name, contact.last_name))
-        content += make_line("    </Contact>")
-        content += make_line("  </InvoiceRecipient>")
-        content += make_line("  <Details>")
-        #content += make_line("    <HeaderDescription>Optionaler Kopftext für alle Details</HeaderDescription>")
-        content += make_line("    <ItemList>")
-        #content += make_line("      <HeaderDescription>Optionaler Kopftext für diese ItemList</HeaderDescription>")
+                'salutation': contact.salutation,
+                'first_name': contact.first_name, 
+                'last_name': contact.last_name,
+                'phone': contact.phone,
+                'email_id': contact.email_id
+            },
+            items: [],
+            taxes: [],
+            'bank_account': {
+                'bic': bank_account.bic,
+                'iban': bank_account.iban
+            },
+            'with_details': with_details
+        }
+        # add items
         for index, item in enumerate(sales_invoice.items, start=1):
-            content += make_line("      <ListLineItem>")
-            content += make_line(u"        <Description>{0}</Description>".format(item.item_name))
-            content += make_line(u"        <Quantity Unit=\"{0}\">{1}</Quantity>".format(item.uom, item.qty))
-            content += make_line(u"        <UnitPrice>{0}</UnitPrice>".format(item.rate))
-            content += make_line("        <InvoiceRecipientsOrderReference>")
-            content += make_line(u"         <OrderID>{0}</OrderID>".format(customer.auftragsreferenz))
-            content += make_line("          <OrderPositionNumber>{0}</OrderPositionNumber>".format(index))
-            content += make_line("        </InvoiceRecipientsOrderReference>")
-            content += make_line("        <TaxItem>")
-            content += make_line("          <TaxableAmount>{0}</TaxableAmount>".format(item.amount))
-            content += make_line("          <TaxPercent TaxCategoryCode=\"S\">20</TaxPercent>")
-            content += make_line("        </TaxItem>")
-            content += make_line("        <LineItemAmount>{0}</LineItemAmount>".format(item.amount))   
-            content += make_line("      </ListLineItem>")
-        #content += make_line("      <FooterDescription>Optionaler Fusstext für diese ItemList</FooterDescription>")
-        content += make_line("    </ItemList>")
-        #content += make_line("    <FooterDescription>Optionaler Fusstext für alle Details</FooterDescription>")
-        content += make_line("  </Details>")
+            i = {
+                'item_name': item.item_name,
+                'uom': item.uom, 
+                'qty': item.qty,
+                'rate': item.rate,
+                'index': index,
+                'amount': item.amount,
+                'tax_percent': 20
+            }
+            data.items.append(i)
+        # add taxes
         for tax in sales_invoice.taxes:
-            content += make_line("  <Tax>")
-            content += make_line("    <TaxItem>")
-            content += make_line("      <TaxableAmount>{0}</TaxableAmount>".format(sales_invoice.net_total))
-            content += make_line("      <TaxPercent TaxCategoryCode=\"S\">{0}</TaxPercent>".format(tax.rate))
-            content += make_line("      <TaxAmount>{0}</TaxAmount>".format(tax.tax_amount))
-            content += make_line("    </TaxItem>")
-            content += make_line("  </Tax>")
-        content += make_line("  <TotalGrossAmount>{0}</TotalGrossAmount>".format(sales_invoice.grand_total))
-        content += make_line("  <PayableAmount>{0}</PayableAmount>".format(sales_invoice.grand_total))
-        content += make_line("  <PaymentMethod>")
-        content += make_line("    <Comment>Wir ersuchen um termingerechte Bezahlung.</Comment>")
-        content += make_line("    <UniversalBankTransaction>")
-        content += make_line("      <BeneficiaryAccount>")
-        bank_account = frappe.get_doc("Account", company.default_bank_account)
-        content += make_line("        <BIC>{0}</BIC>".format(bank_account.bic))
-        content += make_line("        <IBAN>{0}</IBAN>".format(bank_account.iban))
-        content += make_line("        <BankAccountOwner>{0}</BankAccountOwner>".format(company.name))
-        content += make_line("      </BeneficiaryAccount>")
-        content += make_line("    </UniversalBankTransaction>")
-        content += make_line("  </PaymentMethod>")
-        content += make_line("  <PaymentConditions>")
-        content += make_line("    <DueDate>{0}</DueDate>".format(sales_invoice.due_date))
-        #content += make_line("    <Discount>")
-        #content += make_line("      <PaymentDate>2018-12-10</PaymentDate>")
-        #content += make_line("      <Percentage>3.00</Percentage>")
-        #content += make_line("    </Discount>")
-        #content += make_line("    <Comment>Kommentar zu den Zahlungsbedingungen</Comment>")
-        content += make_line("  </PaymentConditions>")
-        #content += make_line("  <Comment>Globaler Kommentar zur Rechnung.</Comment>")
-        content += make_line("</Invoice>")
+            t = {
+                'rate': tax.rate,
+                'tax_amount': tax.tax_amount
+            }
+            data.taxes.append(t)
+        # render xml
+        content = frappe.render_template('erpnextaustria/templates/ebi5p0.html', data)
         return { 'content': content }
     except Exception as err:
         frappe.throw( _("Error while generating xml. Make sure that you made required customisations to the DocTypes. {0}").format(err.message) )
