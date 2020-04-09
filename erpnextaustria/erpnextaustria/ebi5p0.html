@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="http://www.ebinterface.at/schema/5p0/"
+            GeneratingSystem="ERPNext/libracore business software"
+            DocumentType="Invoice"
+            InvoiceCurrency="EUR"
+            Language="ger">
+  <InvoiceNumber>{{ sales_invoice.name }}</InvoiceNumber>
+  <InvoiceDate>{{ sales_invoice.posting_date }}</InvoiceDate>
+  <Delivery>
+    <Date>{{ delivery.delivery_date or sales_invoice.posting_date }}</Date>
+    {% if with_details == 1 -%}
+    <Address>
+      <Name>{{ sales_invoice.company }}</Name>
+      <Street>{{ company.address_line1 }}</Street>
+      <Town>{{ company.city }}</Town>
+      <ZIP>{{ company.pincode }}</ZIP>
+      <Country CountryCode="{{ company.country_code }}">{{ company.country_name }}</Country>
+    </Address>
+    <Contact>
+      <Salutation>Firma</Salutation>
+      <Name>{{ owner.full_name }}</Name>
+    </Contact>
+    {% endif -%}
+  </Delivery>
+  <Biller>
+    <VATIdentificationNumber>{{ company.tax_id }}</VATIdentificationNumber>
+    <FurtherIdentification IdentificationType=\"FS\">{{ company.firmensitz }}</FurtherIdentification>
+    <FurtherIdentification IdentificationType=\"FN\">{{ company.firmenbuchnummer }}</FurtherIdentification>
+    <FurtherIdentification IdentificationType=\"FBG\">{{ company.firmenbuchgericht }}</FurtherIdentification>
+    <Address>
+      <Name>{{ sales_invoice.company }}</Name>
+      <Street>{{ company.address_line1 }}</Street>
+      <Town>{{ company.city }}</Town>
+      <ZIP>{{ company.pincode }}</ZIP>
+      <Country CountryCode="{{ company.country_code }}">{{ company.country_name }}</Country>
+      <Email>{{ sales_invoice.owner }}</Email>
+    </Address>
+    <Contact>
+      <Salutation>Firma</Salutation>
+      <Name>{{ owner.full_name }}</Name>
+    </Contact>
+    <InvoiceRecipientsBillerID>{{ customer.lieferantennummer }}</InvoiceRecipientsBillerID>
+  </Biller>
+  <InvoiceRecipient>
+    <VATIdentificationNumber>{{ customer.tax_id }}</VATIdentificationNumber>
+    <OrderReference>
+      <OrderID>{{ customer.auftragsreferenz }}</OrderID>
+      {% if sales_order -%}
+      <ReferenceDate>{{ sales_order.posting_date }}</ReferenceDate>
+      <Description>{{ sales_order.po_no or "" }}</Description>
+      {% endif -%}
+    </OrderReference>
+    <Address>")
+      <Name>{{ sales_invoice.customer_name }}</Name>
+      <Street>{{ customer.address_line1 }}</Street>
+      <Town>{{ customer.city }}</Town>
+      <ZIP>{{ customer.pincode }}</ZIP>
+      <Country CountryCode="{{ customer.country_code }}">{{ customer.country_name }}</Country>
+      {% if contact.phone %}<Phone>{{ contact.phone }}</Phone>{% endif -%}
+      <Email>{{ ontact.email_id }}</Email>
+    </Address>")
+    <Contact>")
+      {% if contact.salutation %}<Salutation>{{ contact.salutation }}</Salutation>{% endif -%}
+      <Name>{{ contact.first_name }} {{ contact.last_name }}</Name>
+    </Contact>")
+  </InvoiceRecipient>
+  <Details>")
+    <!-- <HeaderDescription>Optionaler Kopftext für alle Details</HeaderDescription> -->
+    <ItemList>
+      <!-- <HeaderDescription>Optionaler Kopftext für diese ItemList</HeaderDescription> -->
+      {% for item in sales_invoice.items -%}
+      <ListLineItem>")
+        <Description>{{ item.item_name }}</Description>
+        <Quantity Unit="{{ item.uom }}">{{ item.qty }}</Quantity>
+        <UnitPrice>{{ item.rate }}</UnitPrice>
+        <InvoiceRecipientsOrderReference>
+          <OrderID>{{ customer.auftragsreferenz }}</OrderID>
+          <OrderPositionNumber>{{ item.index }}</OrderPositionNumber>
+        </InvoiceRecipientsOrderReference>
+        <TaxItem>
+          <TaxableAmount>{{ item.amount }}</TaxableAmount>
+          <TaxPercent TaxCategoryCode=\"S\">20</TaxPercent>
+        </TaxItem>
+        <LineItemAmount>{{ item.amount }}</LineItemAmount> 
+      </ListLineItem>
+      {% endfor -%}
+      <!-- <FooterDescription>Optionaler Fusstext für diese ItemList</FooterDescription> -->
+    </ItemList>")
+    <!-- <FooterDescription>Optionaler Fusstext für alle Details</FooterDescription> -->
+  </Details>
+  {% for tax in sales_invoice.taxes -%}
+  <Tax>")
+    <TaxItem>")
+      <TaxableAmount>{{ sales_invoice.net_total }}</TaxableAmount>
+      <TaxPercent TaxCategoryCode=\"S\">{{ tax.rate }}</TaxPercent>
+      <TaxAmount>{{ tax.tax_amount }}</TaxAmount>
+    </TaxItem>
+  </Tax>
+  {% endfor -%}
+  <TotalGrossAmount>{{ sales_invoice.grand_total }}</TotalGrossAmount>
+  <PayableAmount>{{ sales_invoice.grand_total }}</PayableAmount>
+  <PaymentMethod>
+    <Comment>Wir ersuchen um termingerechte Bezahlung.</Comment>
+    <UniversalBankTransaction>
+      <BeneficiaryAccount>
+        <BIC>{{ bank_account.bic }}</BIC>
+        <IBAN>{{ bank_account.iban }}</IBAN>
+        <BankAccountOwner>{{ company.name }}</BankAccountOwner>
+      </BeneficiaryAccount>
+    </UniversalBankTransaction>
+  </PaymentMethod>
+  <PaymentConditions>
+    <DueDate>{{ sales_invoice.due_date }}</DueDate>
+    <!-- <Discount>
+      <PaymentDate>2018-12-10</PaymentDate>
+      <Percentage>3.00</Percentage>
+    </Discount> -->
+    <!-- <Comment>Kommentar zu den Zahlungsbedingungen</Comment> -->
+  </PaymentConditions>
+  <!-- <Comment>Globaler Kommentar zur Rechnung.</Comment> -->
+</Invoice>"

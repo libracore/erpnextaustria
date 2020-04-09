@@ -38,103 +38,97 @@ def vat_request(uid):
 #
 # Returns an XML-File for a Sales Invoice
 @frappe.whitelist()
-def create_ebinterface_xml(sinv):
+def create_ebinterface_xml(sinv, with_details=1):
     try:
+        # collect information
         sales_invoice = frappe.get_doc("Sales Invoice", sinv)
-
-        # create xml header
-        content = make_line("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-        content += make_line("""<Invoice xmlns=\"http://www.ebinterface.at/schema/5p0/\"
-            GeneratingSystem=\"ERPNext\"
-            DocumentType=\"Invoice\"
-            InvoiceCurrency=\"EUR\"
-            Language=\"ger\">""")
-        content += make_line(u"  <InvoiceNumber>{0}</InvoiceNumber>".format(sales_invoice.name))
-        content += make_line(u"  <InvoiceDate>{0}</InvoiceDate>".format(sales_invoice.posting_date))  # yyyy-mm-dd
-        # Details zur Lieferung
         try:
             company_address = frappe.get_doc("Address", sales_invoice.company_address)
             company_country = frappe.get_doc("Country", company_address.country)
         except Exception as err:
             frappe.throw( _("Company address {0} not found ({1}). Please set an address for company {2}.").format(sales_invoice.company_address, err.message, sinv.company))
+        # Details zur Lieferung
         if sales_invoice.items[0].delivery_note:
             try:
                 delivery_note = frappe.get_doc("Delivery Note", sales_invoice.items[0].delivery_note)
+                delivery_date = delivery_note.posting_date
             except:
                 frappe.msgprint(_("Unable to find delivery note"))
-        content += make_line("  <Delivery>")
-        try:
-            content += make_line("    <Date>{0}</Date>".format(delivery_note.posting_date))
-        except:
-            content += make_line("    <Date>{0}</Date>".format(sales_invoice.posting_date))
-        content += make_line("    <Address>")
-        content += make_line(u"      <Name>{0}</Name>".format(sales_invoice.company))
-        content += make_line(u"      <Street>{0}</Street>".format(company_address.address_line1))
-        content += make_line(u"      <Town>{0}</Town>".format(company_address.city))
-        content += make_line(u"      <ZIP>{0}</ZIP>".format(company_address.pincode))
-        content += make_line(u"      <Country CountryCode=\"{0}\">{1}</Country>".format(company_country.code, company_country.name))
-        content += make_line("    </Address>")
-        content += make_line("    <Contact>")
+        else:
+            delivery_date = sales_invoice.posting_date
         owner = frappe.get_doc("User", sales_invoice.owner)
-        content += make_line("      <Salutation>Firma</Salutation>")
-        content += make_line(u"      <Name>{0}</Name>".format(owner.full_name))
-        content += make_line("    </Contact>")
-        content += make_line("  </Delivery>")
-        # Rechnungssteller
-        content += make_line("  <Biller>")
-        company = frappe.get_doc("Company", sales_invoice.company)
-        content += make_line("    <VATIdentificationNumber>{0}</VATIdentificationNumber>".format(company.tax_id))
-        # Zusätzliche Lieferanteninformationen
-        content += make_line(u"    <FurtherIdentification IdentificationType=\"FS\">{0}</FurtherIdentification>".format(company.firmensitz))
-        content += make_line(u"    <FurtherIdentification IdentificationType=\"FN\">{0}</FurtherIdentification>".format(company.firmenbuchnummer))
-        content += make_line(u"    <FurtherIdentification IdentificationType=\"FBG\">{0}</FurtherIdentification>".format(company.firmenbuchgericht))
-        content += make_line("    <Address>")
-        content += make_line(u"      <Name>{0}</Name>".format(sales_invoice.company))
-        content += make_line(u"      <Street>{0}</Street>".format(company_address.address_line1))
-        content += make_line(u"      <Town>{0}</Town>".format(company_address.city))
-        content += make_line(u"      <ZIP>{0}</ZIP>".format(company_address.pincode))
-        content += make_line(u"      <Country CountryCode=\"{0}\">{1}</Country>".format(company_country.code, company_country.name))
-        # An die folgende E-Mail-Adresse werden die E-Mails gesendet: 
-        content += make_line(u"      <Email>{0}</Email>".format(sales_invoice.owner))
-        content += make_line("    </Address>")
-        content += make_line("    <Contact>")
-        content += make_line("      <Salutation>Firma</Salutation>")
-        content += make_line(u"      <Name>{0}</Name>".format(owner.full_name))
-        content += make_line("    </Contact>")
         # Die Lieferantennummer/Kreditorennummer: 
         customer = frappe.get_doc("Customer", sales_invoice.customer)
         if not customer.lieferantennummer:
             frappe.throw( _("Customer does not have a supplier number. Please add your supplier number to the customer record.") )
-        content += make_line(u"    <InvoiceRecipientsBillerID>{0}</InvoiceRecipientsBillerID>".format(customer.lieferantennummer))
-        content += make_line("  </Biller>")
-        # Rechnungsempfänger 
-        content += make_line("  <InvoiceRecipient>")
-        content += make_line(u"    <VATIdentificationNumber>{0}</VATIdentificationNumber>".format(customer.tax_id))
-        # Die Auftragsreferenz:
-        content += make_line("    <OrderReference>")
         if not customer.auftragsreferenz:
             frappe.throw( _("Customer does not have an order reference. Please add your order reference to the customer record.") )
-        content += make_line(u"      <OrderID>{0}</OrderID>".format(customer.auftragsreferenz))
-        if sales_invoice.items[0].sales_order:
-            try:
-                sales_order = frappe.get_doc("Sales Order", sales_invoice.items[0].sales_order)
-                content += make_line(u"      <ReferenceDate>{0}</ReferenceDate>".format(sales_order.posting_date))
-                content += make_line(u"      <Description>{0}</Description>".format(sales_order.po_no or ""))
-            except:
-                frappe.msgprint(_("Unable to find sales order"))
-        content += make_line("    </OrderReference>")
         try:
             customer_address = frappe.get_doc("Address", sales_invoice.customer_address)
             customer_country = frappe.get_doc("Country", customer_address.country)
         except Exception as err:
             frappe.throw( _("Customer address {0} not found ({1}).").format(sales_invoice.customer_address, err.message))
-        content += make_line("    <Address>")
-        content += make_line(u"      <Name>{0}</Name>".format(sales_invoice.customer_name))
-        content += make_line(u"      <Street>{0}</Street>".format(customer_address.address_line1))
-        content += make_line(u"      <Town>{0}</Town>".format(customer_address.city))
-        content += make_line(u"      <ZIP>{0}</ZIP>".format(customer_address.pincode))
-        content += make_line(u"      <Country CountryCode=\"{0}\">{1}</Country>".format(customer_country.code, customer_country.name))
+        if sales_invoice.items[0].sales_order:
+            try:
+                so = frappe.get_doc("Sales Order", sales_invoice.items[0].sales_order)
+                sales_order = {
+                    'posting_date': so.posting_date
+                    'description': so.po_no or ""
+                }
+            except:
+                frappe.msgprint(_("Unable to find sales order"))
+        else:
+            sales_order = None
         contact = frappe.get_doc("Contact", sales_invoice.contact_person)
+        
+        # create xml header
+        data = {
+            'sales_invoice': {
+                'name': sales_invoice.name
+                'posting_date': sales_invoice.posting_date,
+                'company': sales_invoice.company,
+                'owner': sales_invoice.owner,
+                'customer_name': sales_invoice.customer_name
+            },
+            'delivery': {
+                'delivery_date': delivery_date
+            },
+            'company': {
+                'address_line1': company_address.address_line1,
+                'city': company_address.city,
+                'pincode': company_address.pincode,
+                'country_code': company_country.code, 
+                'country_name': company_country.name,
+                'tax_id': company.tax_id,
+                'firmensitz': company.firmensitz,
+                'firmenbuchnummer': company.firmenbuchnummer,
+                'firmenbuchgericht': company.firmenbuchgericht
+            'owner': {
+                'full_name': owner.full_name
+            },
+            'customer': {
+                'lieferantennummer': customer.lieferantennummer,
+                'tax_id': customer.tax_id,
+                'auftragsreferenz': customer.auftragsreferenz,
+                'address_line1': customer_address.address_line1,
+                'city': customer_address.city,
+                'pincode': customer_address.pincode,
+                'country_code': customer_country.code, 
+                'country_name': customer_country.name
+            },
+            'sales_order': sales_order,
+            'contact': {
+            
+
+
+
+
+        content += make_line(u"      <Name>{0}</Name>".format())
+        content += make_line(u"      <Street>{0}</Street>".format())
+        content += make_line(u"      <Town>{0}</Town>".format())
+        content += make_line(u"      <ZIP>{0}</ZIP>".format())
+        content += make_line(u"      <Country CountryCode=\"{0}\">{1}</Country>".format())
+        
         content += make_line(u"      <Phone>{0}</Phone>".format(contact.phone))
         content += make_line(u"      <Email>{0}</Email>".format(contact.email_id))
         content += make_line("    </Address>")
