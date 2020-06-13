@@ -29,12 +29,12 @@ def execute(filters=None):
 
 def get_data(from_date, end_date, code, company="%"):
     # try to fetch data from VAT query
-    if frappe.db.exists("AT VAT query", "viewVAT_{code}".format(code=code)):
+    if frappe.db.exists("AT VAT query", "viewATVAT_{code}".format(code=code)):
         sql_query = ("""SELECT * 
                 FROM ({query}) AS `s` 
                 WHERE `s`.`posting_date` >= '{start_date}' 
                 AND `s`.`posting_date` <= '{end_date}'""".format(
-                query=frappe.get_value("AT VAT query", "viewVAT_{code}".format(code=code), "query"),
+                query=frappe.get_value("AT VAT query", "viewATVAT_{code}".format(code=code), "query"),
                 start_date=from_date, end_date=end_date).replace("{company}", company))      
     else:
         # fallback database view
