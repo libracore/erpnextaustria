@@ -15,6 +15,13 @@ def get_data():
                 },
                 {
                     "type": "report",
+                    "name": "Kontrolle MwSt AT",
+                    "label": _("Kontrolle MwSt AT"),
+                    "doctype": "Sales Invoice",
+                    "is_query_report": True
+                },
+                {
+                    "type": "report",
                     "doctype": "Sales Invoice",
                     "name": "Summary Message",
                     "label": _("Summary Message"),

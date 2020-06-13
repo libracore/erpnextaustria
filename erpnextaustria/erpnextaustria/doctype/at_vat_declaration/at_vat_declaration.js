@@ -1,4 +1,4 @@
-// Copyright (c) 2018, libracore and contributors
+// Copyright (c) 2018-2020, libracore and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on('AT VAT Declaration', {
@@ -14,11 +14,7 @@ frappe.ui.form.on('AT VAT Declaration', {
         frm.add_custom_button(__("Download XML"), function() 
 		{
 			download_xml(frm);
-		});
-        frm.add_custom_button(__("Show data"), function() 
-		{
-			console.log(frm.doc);
-		});     
+		});   
            
         if (frm.doc.__islocal) {
             // this function is called when a new VAT declaration is created

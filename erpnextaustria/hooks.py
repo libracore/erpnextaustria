@@ -31,6 +31,13 @@ app_license = "AGPL"
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
+# adding Jinja environments
+jenv = {
+    "methods": [
+        "get_at_tax_details:erpnextaustria.erpnextaustria.report.kontrolle_mwst_at.kontrolle_mwst_at.get_data"
+    ]
+}
+
 # Home Pages
 # ----------
 
