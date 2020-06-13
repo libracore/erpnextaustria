@@ -71,4 +71,4 @@ DocType: AT VAT Declaration,Total Tax Due,"Gesamte fällige Steuer"
 Report: Summary Message,Summary Message,Zusammenfassende Meldung
 Report: Intrastat,Intrastat,Intrastat
 DocType: ERPNextAustria Settings,ERPNextAustria Settings,ERPNextAustria-Einstellungen
-
+DocType: QT VAT query,AT VAT query,MwSt-Abfrage AT

@@ -47,7 +47,13 @@ def get_data():
                        "name": "ERPNextAustria Settings",
                        "label": _("ERPNextAustria Settings"),
                        "description": _("ERPNextAustria Settings")
-                   }
+                   },
+                   {
+                    "type": "doctype",
+                    "name": "AT VAT query",
+                    "label": _("AT VAT query"),
+                    "description": _("AT VAT query")
+                }
             ]
         }
     ]
