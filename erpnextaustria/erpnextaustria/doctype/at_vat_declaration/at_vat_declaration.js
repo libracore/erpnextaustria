@@ -247,7 +247,8 @@ function get_total(frm, view, target) {
         args: { 
             start_date: frm.doc.start_date,
             end_date: frm.doc.end_date,
-            view_name: view
+            view_name: view,
+            company: frm.doc.company
         },
         callback: function(r) {
             if (r.message) {
@@ -267,7 +268,8 @@ function get_tax(frm, view, target) {
         args: { 
             start_date: frm.doc.start_date,
             end_date: frm.doc.end_date,
-            view_name: view
+            view_name: view,
+            company: frm.doc.company
         },
         callback: function(r) {
             if (r.message) {
