@@ -210,9 +210,9 @@ def read_exchange_rates(currencies=["CHF"]):
         create_exchange_rate(c, rate)
     return
     
-def create_exchange_rate(from_currency, rate, to_currency="EUR"):
+def create_exchange_rate(to_currency, rate, from_currency="EUR"):
     # insert a new record in ERPNext
-    # Exchange Rate (1 EUR = [?] from_currency)
+    # Exchange Rate (1 EUR = [?] to_currency)
     date = strftime("%Y-%m-%d")
     new_exchange_rate = frappe.get_doc({
         'doctype': "Currency Exchange",
