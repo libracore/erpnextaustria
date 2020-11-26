@@ -2,20 +2,20 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('AT VAT Declaration', {
-	refresh: function(frm) {
-        frm.add_custom_button(__("Get values"), function() 
-		{
-			get_values(frm);
-		});
-        frm.add_custom_button(__("Recalculate"), function() 
-		{
-			update_total_revenue(frm);
-		});
-        frm.add_custom_button(__("Download XML"), function() 
-		{
-			download_xml(frm);
-		});   
-           
+    refresh: function(frm) {
+        frm.add_custom_button(__("Get values"), function() {
+            get_values(frm);
+        });
+        frm.add_custom_button(__("Recalculate"), function() {
+            update_total_revenue(frm);
+        });
+        frm.add_custom_button(__("Download XML"), function() {
+            download_xml(frm);
+        });   
+        frm.add_custom_button(__("Download PDF"), function() {
+            download_pdf(frm);
+        }); 
+        
         if (frm.doc.__islocal) {
             // this function is called when a new VAT declaration is created
             // get current month (0..11)
@@ -303,4 +303,14 @@ function download(filename, content) {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+}
+
+function download_pdf(frm) {
+    var w = window.open(
+    frappe.urllib.get_full_url("/api/method/erpnextaustria.erpnextaustria.doctype.at_vat_declaration.at_vat_declaration.download_uva_pdf?"
+        + "uva=" + encodeURIComponent(frm.doc.name)
+    ));
+    if (!w) {
+        frappe.msgprint(__("Please enable pop-ups")); return;
+    }
 }

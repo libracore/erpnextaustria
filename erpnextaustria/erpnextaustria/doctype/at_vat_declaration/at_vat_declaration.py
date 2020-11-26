@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from datetime import datetime
+import pypdftk
+from frappe.utils import get_bench_path
 
 class ATVATDeclaration(Document):
     # generate xml export
@@ -102,3 +104,20 @@ def get_tax_rate(taxes_and_charges_template):
         return result[0].rate
     else:
         return 0
+
+@frappe.whitelist()
+def download_uva_pdf(uva):
+    doc = frappe.get_doc("AT VAT Declaration", uva)
+    # generate content
+    data = {
+        'Text03': doc.company
+    }
+    # generate pdf
+    generated_pdf = pypdftk.fill_form(get_bench_path() + '/apps/erpnextaustria/erpnextaustria/templates/pdf/U30.pdf', data)
+    with open(generated_pdf, mode='rb') as file:
+        pdf_data = file.read()
+    # return content
+    frappe.local.response.filename = "{name}.pdf".format(name=uva.replace(" ", "-").replace("/", "-"))
+    frappe.local.response.filecontent = pdf_data
+    frappe.local.response.type = "download"
+    return
