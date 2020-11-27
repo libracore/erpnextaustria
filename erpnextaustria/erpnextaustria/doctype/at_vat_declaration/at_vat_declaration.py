@@ -109,8 +109,87 @@ def get_tax_rate(taxes_and_charges_template):
 def download_uva_pdf(uva):
     doc = frappe.get_doc("AT VAT Declaration", uva)
     # generate content
+    company_address = get_company_address(doc.company)
+    settings = frappe.get_doc("ERPNextAustria Settings", "ERPNextAustria Settings")
+    tax_codes = settings.fastnr.split(".") if settings.fastnr else ['00', '000', '0000']
     data = {
-        'Text03': doc.company
+        'Text01': settings.finanzamt,
+        'Checkbox00a': 1,
+        'Zahl03': tax_codes[0],
+        'Zahl02_1': tax_codes[1],
+        'Zahl02_2': tax_codes[2],
+        'Text01_m': "{0}".format(doc.start_date)[5:7],         # month
+        'Text03': doc.company,
+        'Text05': company_address.address_line1 if company_address else "",
+        'Text07b': 'AT',
+        'Text07c': company_address.phone if company_address else "",
+        'Text07d': company_address.pincode if company_address else "",
+        'Text07e': company_address.city if company_address else "",
+        'Zahl101': get_at_value(doc.revenue),                  # 000
+        'Zahl102': get_at_value(doc.self_consumption),         # 001
+        'Zahl103': get_at_value(doc.receiver_vat),             # 021
+        'Zahl104': get_at_value(doc.total_revenue),            # (4.4)
+        'Zahl105': get_at_value(doc.exports),                  # 011
+        'Zahl106': get_at_value(doc.subcontracting),           # 012
+        'Zahl107': get_at_value(doc.cross_border),             # 015
+        'Zahl108': get_at_value(doc.inner_eu),                 # 017
+        'Zahl109': get_at_value(doc.vehicles_without_uid),     # 018
+        'Zahl110': get_at_value(doc.property_revenue),         # 019
+        'Zahl111': get_at_value(doc.small_businesses),         # 016
+        'Zahl113': get_at_value(doc.tax_free_revenue),         # 020
+        'Zahl114': get_at_value(doc.total_amount),             # (4.13)
+        'Zahl115a': get_at_value(doc.amount_normal),           # 022
+        'Zahl115b': get_at_value(doc.tax_normal),              # 022
+        'Zahl116a': get_at_value(doc.reduced_amount),          # 029
+        'Zahl116b': get_at_value(doc.tax_reduced_rate_1),      # 029
+        'Zahl117a': get_at_value(doc.reduced_amount_2),        # 006
+        'Zahl117b': get_at_value(doc.tax_reduced_rate_2),      # 006
+        'Zahl118a': get_at_value(doc.reduced_amount_3),        # 037
+        'Zahl118b': get_at_value(doc.tax_reduced_rate_3),      # 037
+        'Zahl119a': get_at_value(doc.amount_additional_1),     # 052
+        'Zahl119b': get_at_value(doc.tax_additional_1),        # 052
+        'Zahl120a': get_at_value(doc.amount_additional_2),     # 007
+        'Zahl120b': get_at_value(doc.tax_additional_2),        # 007
+        'Zahl121a': get_at_value(0),                           # 009
+        'Zahl121b': get_at_value(0),                           # 009
+        'Zahl123': get_at_value(doc.tax_056),                  # 056
+        'Zahl124': get_at_value(doc.tax_057),                  # 057
+        'Zahl125': get_at_value(doc.tax_048),                  # 048
+        'Zahl125a': get_at_value(doc.tax_044),                 # 044
+        'Zahl125b': get_at_value(doc.tax_032),                 # 032
+        'Zahl126': get_at_value(doc.intercommunal_revenue),    # 070
+        'Zahl127': get_at_value(doc.taxfree_intercommunal),    # 071
+        'Zahl127a': get_at_value(doc.total_intercommunal),     # (4.28)
+        'Zahl128a': get_at_value(doc.amount_inter_normal),     # 072
+        'Zahl128b': get_at_value(doc.tax_inter_normal),        # 072
+        'Zahl129a': get_at_value(doc.amount_inter_reduced_1),  # 073
+        'Zahl129b': get_at_value(doc.tax_inter_reduced_1),     # 073
+        'Zahl129a_1': get_at_value(doc.amount_inter_reduced_2),# 008
+        'Zahl129b_1': get_at_value(doc.tax_inter_reduced_2),   # 008
+        'Zahl130a': get_at_value(doc.amount_inter_reduced_3),  # 088
+        'Zahl130b': get_at_value(doc.tax_inter_reduced_3),     # 088
+        'Zahl130aa': get_at_value(0),                          # 010
+        'Zahl130bb': get_at_value(0),                          # 010
+        'Zahl131': get_at_value(doc.external_taxation),        # 076
+        'Zahl132': get_at_value(doc.internal_taxation),        # 077
+        'Zahl133': get_at_value(doc.total_pretax),             # 060
+        'Zahl134': get_at_value(doc.import_pretax),            # 061
+        'Zahl134a': get_at_value(doc.import_charge_pretax),    # 083
+        'Zahl135': get_at_value(doc.intercommunal_pretax),     # 065
+        'Zahl136': get_at_value(doc.taxation_pretax),          # 066
+        'Zahl136a': get_at_value(doc.taxation_building_pretax),# 082
+        'Zahl137': get_at_value(doc.taxation_pretax_other_1),  # 087
+        'Zahl137a': get_at_value(doc.taxation_pretax_other_2), # 089
+        'Zahl138': get_at_value(doc.vehicles_pretax),          # 064
+        'Zahl139': get_at_value(doc.non_deductable_pretax),    # 062
+        'Zahl140': get_at_value(doc.corrections_1),            # 063
+        'Zahl141': get_at_value(doc.corrections_2),            # 067
+        'Zahl142': get_at_value(doc.total_deductable_pretax),  # (5.13)
+        'Text143': doc.description_other_correction,
+        'Zahl143': get_at_value(doc.tax_other_corrections),    # 090
+        'Zahl144': get_at_value(doc.total_tax_due),            # 095
+        'Checkbox100X': 2 if doc.total_tax_due > 0 else 0,      # (7.1)
+        'Tagesdatum2': datetime.now().strftime("%d.%m.%Y")     # date
     }
     # generate pdf
     generated_pdf = pypdftk.fill_form(get_bench_path() + '/apps/erpnextaustria/erpnextaustria/templates/pdf/U30.pdf', data)
@@ -121,3 +200,28 @@ def download_uva_pdf(uva):
     frappe.local.response.filecontent = pdf_data
     frappe.local.response.type = "download"
     return
+
+def get_at_value(v):
+    return "{0:,.2f}".format(v).replace(",", "'").replace(".", ",").replace("'", "")
+    
+def get_company_address(target_name):
+    sql_query = """SELECT 
+            `tabAddress`.`address_line1`, 
+            `tabAddress`.`address_line2`, 
+            `tabAddress`.`pincode`, 
+            `tabAddress`.`city`, 
+            `tabAddress`.`county`,
+            `tabAddress`.`country`, 
+            `tabAddress`.`phone`, 
+            UPPER(`tabCountry`.`code`) AS `country_code`, 
+            `tabAddress`.`is_primary_address`
+        FROM `tabDynamic Link` 
+        LEFT JOIN `tabAddress` ON `tabDynamic Link`.`parent` = `tabAddress`.`name`
+        LEFT JOIN `tabCountry` ON `tabAddress`.`country` = `tabCountry`.`name`
+        WHERE `link_doctype` = 'Company' AND `link_name` = '{name}'
+        ORDER BY `tabAddress`.`is_primary_address` DESC
+        LIMIT 1;""".format(name=target_name)
+    try:
+        return frappe.db.sql(sql_query, as_dict=True)[0]
+    except:
+        return None

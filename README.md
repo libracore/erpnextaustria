@@ -29,3 +29,8 @@ From the frappe-bench folder, execute
 
 ## Release notes
 Refer to [https://github.com/libracore/erpnextaustria/wiki/Release-Notes](https://github.com/libracore/erpnextaustria/wiki/Release-Notes)
+
+## Important notes
+* The UVA PDF generation only works, if pdftk is installed
+
+    $ sudo apt install pdftk
