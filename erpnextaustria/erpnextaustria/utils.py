@@ -208,6 +208,7 @@ def read_exchange_rates(currencies=["CHF"]):
     for c in currencies:
         rate = get_eur_exchange_rate(c)
         create_exchange_rate(c, rate)
+        create_exchange_rate("EUR", (1/rate), c)    # create inverse conversion rate
     return
     
 def create_exchange_rate(to_currency, rate, from_currency="EUR"):
