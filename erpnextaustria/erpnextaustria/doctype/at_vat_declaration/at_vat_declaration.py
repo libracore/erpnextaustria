@@ -13,7 +13,7 @@ class ATVATDeclaration(Document):
     # generate xml export
     def generate_transfer_file(self):
         #try:
-        fastnr = frappe.get_value("ERPNextAustria Settings", "ERPNextAustria Settings", "fastnr")
+        fastnr = frappe.get_value("ERPNextAustria Settings", "ERPNextAustria Settings", "fastnr").replace('.', '')
         now = datetime.now()
         data = {
             'fastnr': fastnr,
