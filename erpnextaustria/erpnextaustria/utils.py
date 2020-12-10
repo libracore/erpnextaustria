@@ -72,7 +72,7 @@ def create_ebinterface_xml(sinv, with_details=1):
             try:
                 so = frappe.get_doc("Sales Order", sales_invoice.items[0].sales_order)
                 sales_order = {
-                    'posting_date': so.posting_date,
+                    'posting_date': so.transaction_date,
                     'description': so.po_no or ""
                 }
             except:
