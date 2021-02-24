@@ -90,7 +90,7 @@ def generate_transfer_file(month, year):
         content += make_line("{kn8};{type};{stat};{item_name};{supl_cntry};{source_cntry};{uom};{spec_uom};{traffic};{amount};{value}".format(
             type="1",
             stat="40000",
-            kn8=data[i][2].replace(' ', ''),
+            kn8=(data[i][2] or '').replace(' ', ''),
             item_name=data[i][1],
             supl_cntry=data[i][3],
             source_cntry=data[i][4],
