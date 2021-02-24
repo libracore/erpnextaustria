@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2017-2018, libracore and contributors
+# Copyright (c) 2017-2021, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -90,12 +90,12 @@ def generate_transfer_file(month, year):
         content += make_line("{kn8};{type};{stat};{item_name};{supl_cntry};{source_cntry};{uom};{spec_uom};{traffic};{amount};{value}".format(
             type="1",
             stat="40000",
-            kn8=data[i][2],
+            kn8=data[i][2].replace(' ', ''),
             item_name=data[i][1],
             supl_cntry=data[i][3],
             source_cntry=data[i][4],
-            uom=data[i][5],
-            spec_uom=data[i][6],
+            uom=int(data[i][5] or 0),
+            spec_uom=int(data[i][6] or 0),
             traffic="3",
             amount=data[i][7],
             value=data[i][8]
