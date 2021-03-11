@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020, libracore and contributors
+// Copyright (c) 2018-2021, libracore and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on('AT VAT Declaration', {
@@ -20,25 +20,23 @@ frappe.ui.form.on('AT VAT Declaration', {
             // this function is called when a new VAT declaration is created
             // get current month (0..11)
             var d = new Date();
+            // test data
+            //d = new  Date(2021,0,11); // in January, select last December
+            //d = new  Date(2021,1,11); // in February, selet January
+            //d = new  Date(2021,11,11); // in December, select November
             var n = d.getMonth();
-            // define title as Qn YYYY of the last complete quarter
+            // define title as YYYY-mm of the last month
             var title = " / " + d.getFullYear();
-            if ((n > (-1)) && (n < 3)) {
-                title = "Q04 / " + (d.getFullYear() - 1);
-                frm.set_value('start_date', (d.getFullYear() - 1) + "-10-01");
+            if (n === 0) {
+                title = (d.getFullYear() - 1) + "-" + 12;
+                frm.set_value('start_date', (d.getFullYear() - 1) + "-12-01");
                 frm.set_value('end_date', (d.getFullYear() - 1) + "-12-31");
-            } else if ((n > (2)) && (n < 6)) {
-                title = "Q01" + title;
-                frm.set_value('start_date', d.getFullYear() + "-01-01");
-                frm.set_value('end_date', d.getFullYear() + "-03-31");
-            } else if ((n > (5)) && (n < 9)) {
-                title = "Q02" + title;
-                frm.set_value('start_date', d.getFullYear() + "-04-01");
-                frm.set_value('end_date', d.getFullYear() + "-06-30");
             } else {
-                title = "Q03" + title;
-                frm.set_value('start_date', d.getFullYear() + "-07-01");
-                frm.set_value('end_date', d.getFullYear() + "-09-30");
+                title = d.getFullYear() + "-" + ("0" + n).substr(-2);
+                var d1 = new Date(d.getFullYear(), (n-1), 1);
+                frm.set_value('start_date', formatUNCDate(d1));
+                var d2 = new Date(d.getFullYear(), n, 0);
+                frm.set_value('end_date', formatUNCDate(d2));
             } 
 
             frm.set_value('title', title);
@@ -313,4 +311,18 @@ function download_pdf(frm) {
     if (!w) {
         frappe.msgprint(__("Please enable pop-ups")); return;
     }
+}
+
+function formatUNCDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('-');
 }
