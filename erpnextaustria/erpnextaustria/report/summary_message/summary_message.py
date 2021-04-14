@@ -78,7 +78,7 @@ def generate_transfer_file(month, year):
     content += make_line("<ERKLAERUNGS_UEBERMITTLUNG>")
     content += make_line(" <INFO_DATEN>")
     content += make_line("  <ART_IDENTIFIKATIONSBEGRIFF>FASTNR</ART_IDENTIFIKATIONSBEGRIFF>")
-    fastnr = frappe.get_value("ERPNextAustria Settings", "ERPNextAustria Settings", "fastnr")
+    fastnr = frappe.get_value("ERPNextAustria Settings", "ERPNextAustria Settings", "fastnr").replace(".", "")
     companies = frappe.get_all("Company", fields=['name'])
     company = companies[0]['name']
     content += make_line("  <IDENTIFIKATIONSBEGRIFF>{0}</IDENTIFIKATIONSBEGRIFF>".format(fastnr))
