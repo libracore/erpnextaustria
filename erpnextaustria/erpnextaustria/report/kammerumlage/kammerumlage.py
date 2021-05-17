@@ -73,25 +73,28 @@ def get_data(filters):
     
     # compute totals
     totals = {'m0': 0.0, 'm1': 0.0, 'm2': 0.0}
+    output = []
     for d in data:
-        d['total'] = d['m0'] + d['m1'] + d['m2']
-        totals['m0'] += d['m0']
-        totals['m1'] += d['m1']
-        totals['m2'] += d['m2']
+        if d['m0'] != 0 or d['m1'] != 0 or d['m2'] != 0:
+            output.append(d)
+            output[-1]['total'] = d['m0'] + d['m1'] + d['m2']
+            totals['m0'] += d['m0']
+            totals['m1'] += d['m1']
+            totals['m2'] += d['m2']
     total = totals['m0'] + totals['m1'] +totals['m2']
     rate = frappe.get_value("ERPNextAustria Settings", "ERPNextAustria Settings", "ansatz_kammerumlage")
     fee = (float(rate or 0) / 100) * total
-    data.append({
+    output.append({
         'm0': totals['m0'],
         'm1': totals['m1'],
         'm2': totals['m2'],
         'total': total
     })
-    data.append({
+    output.append({
         'total': fee
     })
     
-    return data
+    return output
 
 @frappe.whitelist()
 def generate_transfer_file(filters):

@@ -35,6 +35,14 @@ def get_data():
                     "label": _("Intrastat"),
                     "description": _("Intrastat"),
                     "is_query_report": True
+                },
+                {
+                    "type": "report",
+                    "doctype": "GL Entry",
+                    "name": "Kammerumlage",
+                    "label": _("Kammerumlage"),
+                    "description": _("Kammerumlage"),
+                    "is_query_report": True
                 }
             ]
         },
