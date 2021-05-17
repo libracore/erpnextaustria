@@ -63,10 +63,12 @@ def get_data(filters):
             sql_query = """SELECT 
                       {deduction} * IFNULL(SUM(`debit` - `credit`), 0) AS `amount`
                     FROM `tabGL Entry`
+                    LEFT JOIN `tabJournal Entry` ON `tabJournal Entry`.`name` = `tabGL Entry`.`voucher_no`
                     WHERE 
                       `tabGL Entry`.`account` = "{account}"
                       AND `tabGL Entry`.`company` = "{company}"
                       AND `tabGL Entry`.`posting_date` LIKE "{year}-{month}-%"
+                      AND (`tabJournal Entry`.`is_opening` IS NULL OR `tabJournal Entry`.`is_opening` = "No")
                     """.format(year=filters['year'], month=months[m], account=data[d]['account'], company=filters['company'], deduction=deduction)
             value = frappe.db.sql(sql_query, as_dict=True)
             data[d]["m{0}".format(m)] = value[0]['amount']
