@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ERKLAERUNGS_UEBERMITTLUNG>
+ <INFO_DATEN>
+  <ART_IDENTIFIKATIONSBEGRIFF>FASTNR</ART_IDENTIFIKATIONSBEGRIFF>
+  <IDENTIFIKATIONSBEGRIFF>{{ fastnr }}</IDENTIFIKATIONSBEGRIFF>
+  <PAKET_NR>{{ paket }}</PAKET_NR>
+  <DATUM_ERSTELLUNG type="datum">{{ creation_date }}</DATUM_ERSTELLUNG>
+  <UHRZEIT_ERSTELLUNG type="uhrzeit">{{ creation_time }}</UHRZEIT_ERSTELLUNG>
+  <ANZAHL_ERKLAERUNGEN>1</ANZAHL_ERKLAERUNGEN>
+ </INFO_DATEN>
+ <ERKLAERUNG art="SB">
+  <ALLGEMEINE_DATEN>
+   <SATZNR>1</SATZNR>
+   <ANBRINGEN>SB</ANBRINGEN>
+   <FASTNR>{{ fastnr }}</FASTNR>
+   <KUNDENINFO>SB,ERPNEXT</KUNDENINFO>
+  </ALLGEMEINE_DATEN>
+  <UVA_ZEITRAUM>
+   <UVAZRVON type="jahrmonat">{{ month_from }}</UVAZRVON>
+   <UVAZRBIS type="jahrmonat">{{ month_to }}</UVAZRBIS>
+  </UVA_ZEITRAUM>
+  <VERRECHNUNGSWEISUNGEN>
+   <AA>40</AA>
+   <ZRVON type="jahrmonat">{{ month_from }}</ZRVON>
+   <ZRBIS type="jahrmonat">{{ month_to }}</ZRBIS>
+   <BETRAG type="kz">{{ amount }}</BETRAG>
+  </VERRECHNUNGSWEISUNGEN>
+ </ERKLAERUNG>
+</ERKLAERUNGS_UEBERMITTLUNG>

@@ -6,7 +6,11 @@
  "field_order": [
   "fastnr",
   "column_main",
-  "finanzamt"
+  "finanzamt",
+  "section_kammerumlage",
+  "ansatz_kammerumlage",
+  "column_kammerumlage",
+  "accounts"
  ],
  "fields": [
   {
@@ -23,10 +27,30 @@
    "fieldname": "finanzamt",
    "fieldtype": "Data",
    "label": "Finanzamt"
+  },
+  {
+   "fieldname": "section_kammerumlage",
+   "fieldtype": "Section Break",
+   "label": "Kammerumlage"
+  },
+  {
+   "fieldname": "ansatz_kammerumlage",
+   "fieldtype": "Percent",
+   "label": "Ansatz Kammerumlage"
+  },
+  {
+   "fieldname": "column_kammerumlage",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Accounts",
+   "options": "Kammerumlage Account"
   }
  ],
  "issingle": 1,
- "modified": "2020-11-27 01:38:02.623056",
+ "modified": "2021-05-17 19:47:58.690884",
  "modified_by": "Administrator",
  "module": "ERPNextAustria",
  "name": "ERPNextAustria Settings",

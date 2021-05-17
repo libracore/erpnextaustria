@@ -1,0 +1,47 @@
+{
+ "creation": "2021-05-17 19:47:37.664600",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "account",
+  "is_deduction",
+  "deduction"
+ ],
+ "fields": [
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_deduction",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Deduction"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:is_deduction==1",
+   "fieldname": "deduction",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Deduction"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-05-17 20:38:39.017552",
+ "modified_by": "Administrator",
+ "module": "ERPNextAustria",
+ "name": "Kammerumlage Account",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
