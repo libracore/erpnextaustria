@@ -18,7 +18,7 @@ def execute(filters=None):
 
 def get_columns(filters):
     columns = [
-        {"label": _("Account"), "fieldname": "account", "fieldtype": "Link", "options": "Item", "width": 150}
+        {"label": _("Account"), "fieldname": "account", "fieldtype": "Link", "options": "Account", "width": 150}
     ]
     months = {
         'Q1': [_("January"), _("February"), _("March")],
