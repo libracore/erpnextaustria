@@ -1,0 +1,40 @@
+{
+ "creation": "2021-05-31 09:20:22.294342",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "uva_code",
+  "account"
+ ],
+ "fields": [
+  {
+   "fieldname": "uva_code",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "UVA Code",
+   "options": "Tax-Account\n022\n029\n006\n037\n052\n007\n056\n057\n048\n044\n032\n072\n073\n008\n088\n060\n061\n083\n065\n066\n082\n087\n089\n064\n062\n063\n067",
+   "reqd": 1,
+   "translatable": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-05-31 09:54:59.101893",
+ "modified_by": "Administrator",
+ "module": "ERPNextAustria",
+ "name": "UVA Account",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

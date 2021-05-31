@@ -68,6 +68,9 @@ DocType: AT VAT Declaration,Total deductable Pretax,"Gesamtbetrag der abziehbare
 DocType: AT VAT Declaration,Other corrections,"Sonstige Berichtigungen"
 DocType: AT VAT Declaration,Tax Amount,"Steuerbetrag"
 DocType: AT VAT Declaration,Total Tax Due,"Gesamte fällige Steuer"
+DocType: AT VAT Declaration,"Unable to create journal entry: configuration missing","Buchungssatz kann nicht erstellt werden: Einstellungen (ERPNextAustria) fehlen"
+DocType: AT VAT Declaration,Auto creation failed,Automatische Erstellung fehlgeschlagen
+DocType: AT VAT Declaration,Tax-Account,Steuerkonto
 Report: Summary Message,Summary Message,Zusammenfassende Meldung
 Report: Intrastat,Intrastat,Intrastat
 DocType: ERPNextAustria Settings,ERPNextAustria Settings,ERPNextAustria-Einstellungen
