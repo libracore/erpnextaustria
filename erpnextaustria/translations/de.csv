@@ -74,4 +74,7 @@ DocType: AT VAT Declaration,Tax-Account,Steuerkonto
 Report: Summary Message,Summary Message,Zusammenfassende Meldung
 Report: Intrastat,Intrastat,Intrastat
 DocType: ERPNextAustria Settings,ERPNextAustria Settings,ERPNextAustria-Einstellungen
-DocType: QT VAT query,AT VAT query,MwSt-Abfrage AT
+DocType: AT VAT query,AT VAT query,MwSt-Abfrage AT
+Report: OP Debitoren,Voucher No,Dokument
+Report: OP Debitoren,Voucher Type,Dokumentenart
+Report: OP Debitoren,Invoiced Amount,Rechnungsbetrag

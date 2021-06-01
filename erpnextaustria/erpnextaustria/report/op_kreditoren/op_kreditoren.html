@@ -1,1 +1,56 @@
-{% include "accounts/report/accounts_receivable/accounts_receivable.html" %}
+<style>
+    .print-format {
+        padding: 4mm;
+        font-size: 8px !important;
+    }
+    .print-format td {
+        padding: 0px !important;
+    }
+</style>
+
+<h2 class="text-left" style="margin-top:0">{%= __(report.report_name) %} {%= filters.company %} {%= __("per") %} {%= frappe.datetime.str_to_user(filters.report_date) %}</h2>
+
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width: 9%; padding: 0px !important; ">{%= __("Date") %}</th>
+            <th style="width: 9%; padding: 0px !important; ">{%= __("Due Date") %}</th>
+            <th style="width: 11%; padding: 0px !important; ">{%= __("Supplier") %}</th>
+            <th style="width: 20%; padding: 0px !important; ">{%= __("Supplier Name") %}</th>
+            <th style="width: 14%; padding: 0px !important; ">{%= __("Voucher Type") %}</th>
+            <th style="width: 10%; padding: 0px !important; ">{%= __("Voucher No") %}</th>
+            <th style="width: 16%; text-align: right; padding: 0px !important; ">{%= __("Invoiced Amount") %}</th>
+            <th style="width: 16%; text-align: right; padding: 0px !important; ">{%= __("Outstanding Amount") %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for(var i=0, l=data.length; i<l; i++) { %}
+            {% if (data[i].posting_date) { %}
+            <tr>
+                <td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
+                <td>{%= frappe.datetime.str_to_user(data[i].due_date) %}</td>
+                <td>{%= data[i].supplier %}</td>
+                <td>{%= data[i].supplier_name %}</td>
+                <td>{%= __(data[i].voucher_type) %}</td>
+                <td>{%= data[i].voucher_no %}</td>
+                <td style="text-align: right; ">{%= format_currency(data[i].invoiced) %}</td>
+                <td style="text-align: right; ">{%= format_currency(data[i].outstanding) %}</td>
+            </tr>
+            {% } else { %}
+            <tr>
+                <td style="border-bottom: 1px solid black; "></td>
+                <td style="border-bottom: 1px solid black; "></td>
+                <td style="border-bottom: 1px solid black; "><b>{%= data[i].supplier %}</b></td>
+                <td style="border-bottom: 1px solid black; "><b>{%= data[i].supplier_name %}</b></td>
+                <td style="border-bottom: 1px solid black; "><b>{%= data[i].voucher_type %}</b></td>
+                <td style="border-bottom: 1px solid black; "><b>{%= data[i].voucher_no %}</b></td>
+                <td style="text-align: right; border-bottom: 1px solid black; "><b>{%= format_currency(data[i].invoiced) %}</b></td>
+                <td style="text-align: right; border-bottom: 1px solid black; "><b>{%= format_currency(data[i].outstanding) %}</b></td>
+            </tr>
+            {% } %}
+        {% } %}
+    </tbody>
+</table>
+
+<p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
