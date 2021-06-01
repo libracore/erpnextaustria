@@ -17,7 +17,7 @@ def execute(filters=None):
     output = []
     customers = []
     for d in data:
-        customer = d['customer'] if 'customer' in d else d['customer_name']
+        customer = d['party'] if 'party' in d else d['customer_name']
         if not customer in customers:
             customers.append(customer)
     for c in sorted(customers or []):
@@ -26,13 +26,13 @@ def execute(filters=None):
             'outstanding': 0
         }
         for d in data:
-            customer = d['customer'] if 'customer' in d else d['customer_name']
+            customer = d['party'] if 'party' in d else d['customer_name']
             if customer == c:
                 output.append(d)
                 customer_totals['invoiced'] += d['invoiced']
                 customer_totals['outstanding'] += d['outstanding']
         output.append({
-            'customer': c,
+            'party': c,
             'invoiced': customer_totals['invoiced'],
             'outstanding': customer_totals['outstanding']
         })
@@ -54,7 +54,7 @@ def get_columns():
         },
         {
             "label": _("Customer"),
-            "fieldname": "customer",
+            "fieldname": "party",
             "fieldtype": "Link",
             "options": "Customer",
             "width": 120

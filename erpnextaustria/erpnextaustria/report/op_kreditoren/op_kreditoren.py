@@ -16,7 +16,7 @@ def execute(filters=None):
     output = []
     suppliers = []
     for d in data:
-        supplier = d['supplier'] if 'supplier' in d else d['supplier_name']
+        supplier = d['party'] if 'party' in d else d['supplier_name']
         if not supplier in suppliers:
             suppliers.append(supplier)
     for c in sorted(suppliers or []):
@@ -25,13 +25,13 @@ def execute(filters=None):
             'outstanding': 0
         }
         for d in data:
-            supplier = d['supplier'] if 'supplier' in d else d['supplier_name']
+            supplier = d['party'] if 'party' in d else d['supplier_name']
             if supplier == c:
                 output.append(d)
                 supplier_totals['invoiced'] += d['invoiced']
                 supplier_totals['outstanding'] += d['outstanding']
         output.append({
-            'supplier': c,
+            'party': c,
             'invoiced': supplier_totals['invoiced'],
             'outstanding': supplier_totals['outstanding']
         })
@@ -53,7 +53,7 @@ def get_columns():
         },
         {
             "label": _("Supplier"),
-            "fieldname": "supplier",
+            "fieldname": "party",
             "fieldtype": "Link",
             "options": "Supplier",
             "width": 120
