@@ -30,7 +30,7 @@
             <tr>
                 <td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
                 <td>{%= frappe.datetime.str_to_user(data[i].due_date) %}</td>
-                <td>{%= data[i].customer %}</td>
+                <td>{%= data[i].party %}</td>
                 <td>{%= data[i].customer_name %}</td>
                 <td>{%= __(data[i].voucher_type) %}</td>
                 <td>{%= data[i].voucher_no %}</td>
@@ -41,8 +41,8 @@
             <tr>
                 <td style="border-bottom: 1px solid black; "></td>
                 <td style="border-bottom: 1px solid black; "></td>
-                <td style="border-bottom: 1px solid black; "><b>{%= data[i].customer %}</b></td>
-                <td style="border-bottom: 1px solid black; "><b>{%= data[i].customer_name %}</b></td>
+                <td style="border-bottom: 1px solid black; "><b>{%= data[i].party %}</b></td>
+                <td style="border-bottom: 1px solid black; "><b>{%= data[(i-1)].customer_name %}</b></td>
                 <td style="border-bottom: 1px solid black; "><b>{%= data[i].voucher_type %}</b></td>
                 <td style="border-bottom: 1px solid black; "><b>{%= data[i].voucher_no %}</b></td>
                 <td style="text-align: right; border-bottom: 1px solid black; "><b>{%= format_currency(data[i].invoiced) %}</b></td>
