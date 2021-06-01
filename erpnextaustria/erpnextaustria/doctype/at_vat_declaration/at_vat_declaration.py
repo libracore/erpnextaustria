@@ -1,15 +1,126 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2018, libracore and contributors
+# Copyright (c) 2018-2021, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from datetime import datetime
 import pypdftk
 from frappe.utils import get_bench_path
 
 class ATVATDeclaration(Document):
+    def on_submit(self):
+        if self.auto_create_journal_entry:
+            settings = frappe.get_doc("ERPNextAustria Settings", "ERPNextAustria Settings")
+            if not settings.uva_accounts or len(settings.uva_accounts) == 0:
+                frappe.msgprint( _("Unable to create journal entry: configuration missing"), _("Auto creation failed") )
+            else:
+                doc = frappe.get_doc({
+                    'doctype': "Journal Entry",
+                    'is_opening': "Yes",
+                    'posting_date': self.end_date
+                })
+                total_tax = 0
+                total_tax_account = None
+                for a in settings.uva_accounts:
+                    if a.uva_code == "Tax-Account":
+                        total_tax_account = a.account
+                    else:
+                        # normal taxdes
+                        if a.uva_code == "022":
+                            total_tax += self.tax_normal
+                            doc = append_tax(doc, a.account, self.tax_normal, 0)
+                        elif a.uva_code == "029":
+                            total_tax += self.tax_reduced_rate_1
+                            doc = append_tax(doc, a.account, self.tax_reduced_rate_1, 0)
+                        elif a.uva_code == "006":
+                            total_tax += self.tax_reduced_rate_2
+                            doc = append_tax(doc, a.account, self.tax_reduced_rate_2, 0)
+                        elif a.uva_code == "037":
+                            total_tax += self.tax_reduced_rate_3
+                            doc = append_tax(doc, a.account, self.tax_reduced_rate_3, 0)
+                        elif a.uva_code == "052":
+                            total_tax += self.tax_additional_1
+                            doc = append_tax(doc, a.account, self.tax_additional_1, 0)
+                        elif a.uva_code == "007":
+                            total_tax += self.tax_additional_2
+                            doc = append_tax(doc, a.account, self.tax_additional_2, 0)
+                        # other taxes
+                        elif a.uva_code == "056":
+                            total_tax += self.tax_056
+                            doc = append_tax(doc, a.account, self.tax_056, 0)
+                        elif a.uva_code == "057":
+                            total_tax += self.tax_057
+                            doc = append_tax(doc, a.account, self.tax_057, 0)
+                        elif a.uva_code == "048":
+                            total_tax += self.tax_048
+                            doc = append_tax(doc, a.account, self.tax_048, 0)
+                        elif a.uva_code == "044":
+                            total_tax += self.tax_044
+                            doc = append_tax(doc, a.account, self.tax_044, 0)
+                        elif a.uva_code == "032":
+                            total_tax += self.tax_032
+                            doc = append_tax(doc, a.account, self.tax_032, 0)
+                        # intercommunal
+                        elif a.uva_code == "072":
+                            total_tax += self.tax_inter_normal
+                            doc = append_tax(doc, a.account, self.tax_inter_normal, 0)
+                        elif a.uva_code == "073":
+                            total_tax += self.tax_inter_reduced_1
+                            doc = append_tax(doc, a.account, self.tax_inter_reduced_1, 0)
+                        elif a.uva_code == "008":
+                            total_tax += self.tax_inter_reduced_2
+                            doc = append_tax(doc, a.account, self.tax_inter_reduced_2, 0)
+                        elif a.uva_code == "088":
+                            total_tax += self.tax_inter_reduced_3
+                            doc = append_tax(doc, a.account, self.tax_inter_reduced_3, 0)
+                        # pretax
+                        elif a.uva_code == "060":
+                            total_tax -= self.total_pretax
+                            doc = append_tax(doc, a.account, 0, self.total_pretax)
+                        elif a.uva_code == "061":
+                            total_tax -= self.import_pretax
+                            doc = append_tax(doc, a.account, 0, self.import_pretax)
+                        elif a.uva_code == "083":
+                            total_tax -= self.import_charge_pretax
+                            doc = append_tax(doc, a.account, 0, self.import_charge_pretax)
+                        elif a.uva_code == "065":
+                            total_tax -= self.intercommunal_pretax
+                            doc = append_tax(doc, a.account, 0, self.intercommunal_pretax)
+                        elif a.uva_code == "066":
+                            total_tax -= self.taxation_pretax
+                            doc = append_tax(doc, a.account, 0, self.taxation_pretax)
+                        elif a.uva_code == "082":
+                            total_tax -= self.taxation_building_pretax
+                            doc = append_tax(doc, a.account, 0, self.taxation_building_pretax)
+                        elif a.uva_code == "087":
+                            total_tax -= self.taxation_pretax_other_1
+                            doc = append_tax(doc, a.account, 0, self.taxation_pretax_other_1)
+                        elif a.uva_code == "089":
+                            total_tax -= self.taxation_pretax_other_2
+                            doc = append_tax(doc, a.account, 0, self.taxation_pretax_other_2)
+                        elif a.uva_code == "064":
+                            total_tax -= self.vehicles_pretax
+                            doc = append_tax(doc, a.account, 0, self.vehicles_pretax)
+                        elif a.uva_code == "062":
+                            total_tax -= self.not_deductable_pretax
+                            doc = append_tax(doc, a.account, 0, self.not_deductable_pretax)
+                        elif a.uva_code == "063":
+                            total_tax -= self.corrections_1
+                            doc = append_tax(doc, a.account, 0, self.corrections_1)
+                        elif a.uva_code == "067":
+                            total_tax -= self.corrections_2
+                            doc = append_tax(doc, a.account, 0, self.corrections_2)
+                # actual tax on tax account
+                doc = append_tax(doc, total_tax_account, 0, total_tax)
+                doc.insert()
+                self.journal_entry = doc.name
+                self.save()
+                doc.submit()
+        return
+        
     # generate xml export
     def generate_transfer_file(self):
         #try:
@@ -48,6 +159,14 @@ class ATVATDeclaration(Document):
     #    frappe.throw( _("Error while generating xml. Make sure that you made required customisations to the DocTypes.") )
     #    return
 
+def append_tax(doc, account, debit, credit):
+    doc.append('accounts', {
+        'account': account,
+        'debit_in_account_currency': debit,
+        'credit_in_account_currency': credit
+    })
+    return doc
+    
 # note: do not move below functions into the class, otherwise, saving values will be impossible
 @frappe.whitelist()
 def get_view_total(view_name, start_date, end_date, company="%"):
