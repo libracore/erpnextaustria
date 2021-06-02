@@ -16,6 +16,10 @@ def execute(filters=None):
     # aggregate by customer
     output = []
     customers = []
+    overall_totals = {
+            'invoiced': 0,
+            'outstanding': 0
+        }
     for d in data:
         customer = d['party'] if 'party' in d else d['customer_name']
         if not customer in customers:
@@ -31,11 +35,19 @@ def execute(filters=None):
                 output.append(d)
                 customer_totals['invoiced'] += d['invoiced']
                 customer_totals['outstanding'] += d['outstanding']
+                overall_totals['invoiced'] += d['invoiced']
+                overall_totals['outstanding'] += d['outstanding']
         output.append({
             'party': c,
             'invoiced': customer_totals['invoiced'],
             'outstanding': customer_totals['outstanding']
         })
+    # use manual total, automatic sum would be double the actual value
+    output.append({
+        'party': _("Total"),
+        'invoiced': overall_totals['invoiced'],
+        'outstanding': overall_totals['outstanding']
+    })
     return columns, output
 
 def get_columns():

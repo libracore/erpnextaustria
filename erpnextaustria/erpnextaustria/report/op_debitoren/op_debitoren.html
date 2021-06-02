@@ -14,39 +14,36 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th style="width: 9%; padding: 0px !important; ">{%= __("Date") %}</th>
-            <th style="width: 9%; padding: 0px !important; ">{%= __("Due Date") %}</th>
-            <th style="width: 11%; padding: 0px !important; ">{%= __("Customer") %}</th>
-            <th style="width: 20%; padding: 0px !important; ">{%= __("Customer Name") %}</th>
-            <th style="width: 14%; padding: 0px !important; ">{%= __("Voucher Type") %}</th>
-            <th style="width: 10%; padding: 0px !important; ">{%= __("Voucher No") %}</th>
-            <th style="width: 16%; text-align: right; padding: 0px !important; ">{%= __("Invoiced Amount") %}</th>
-            <th style="width: 16%; text-align: right; padding: 0px !important; ">{%= __("Outstanding Amount") %}</th>
+            <th style="width: 9%; padding: 0px 2px !important; ">{%= __("Date") %}</th>
+            <th style="width: 9%; padding: 0px 2px !important; ">{%= __("Due Date") %}</th>
+            <th style="width: 11%; padding: 0px 2px !important; ">{%= __("Customer") %}</th>
+            <th style="width: 31%; padding: 0px 2px !important; ">{%= __("Customer Name") %}</th>
+            <th style="width: 10%; padding: 0px 2px !important; ">{%= __("Voucher No") %}</th>
+            <th style="width: 14%; text-align: right; padding: 0px 2px !important; ">{%= __("Invoiced Amount") %}</th>
+            <th style="width: 16%; text-align: right; padding: 0px 2px !important; ">{%= __("Outstanding Amount") %}</th>
         </tr>
     </thead>
     <tbody>
-        {% for(var i=0, l=data.length; i<l; i++) { %}
+        {% for(var i=0, l=(data.length - 1); i<l; i++) { %}
             {% if (data[i].posting_date) { %}
             <tr>
-                <td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
-                <td>{%= frappe.datetime.str_to_user(data[i].due_date) %}</td>
-                <td>{%= data[i].party %}</td>
-                <td>{%= data[i].customer_name %}</td>
-                <td>{%= __(data[i].voucher_type) %}</td>
-                <td>{%= data[i].voucher_no %}</td>
-                <td style="text-align: right; ">{%= format_currency(data[i].invoiced) %}</td>
-                <td style="text-align: right; ">{%= format_currency(data[i].outstanding) %}</td>
+                <td style="padding: 0px 2px !important; ">{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
+                <td style="padding: 0px 2px !important; ">{%= frappe.datetime.str_to_user(data[i].due_date) %}</td>
+                <td style="padding: 0px 2px !important; ">{%= data[i].party %}</td>
+                <td style="padding: 0px 2px !important; ">{%= data[i].customer_name %}</td>
+                <td style="padding: 0px 2px !important; ">{%= data[i].voucher_no %}</td>
+                <td style="text-align: right; padding: 0px 2px !important; ">{%= format_currency(data[i].invoiced) %}</td>
+                <td style="text-align: right; padding: 0px 2px !important; ">{%= format_currency(data[i].outstanding) %}</td>
             </tr>
             {% } else { %}
             <tr>
-                <td style="border-bottom: 1px solid black; "></td>
-                <td style="border-bottom: 1px solid black; "></td>
-                <td style="border-bottom: 1px solid black; "><b>{%= data[i].party %}</b></td>
-                <td style="border-bottom: 1px solid black; "><b>{%= data[(i-1)].customer_name %}</b></td>
-                <td style="border-bottom: 1px solid black; "><b>{%= data[i].voucher_type %}</b></td>
-                <td style="border-bottom: 1px solid black; "><b>{%= data[i].voucher_no %}</b></td>
-                <td style="text-align: right; border-bottom: 1px solid black; "><b>{%= format_currency(data[i].invoiced) %}</b></td>
-                <td style="text-align: right; border-bottom: 1px solid black; "><b>{%= format_currency(data[i].outstanding) %}</b></td>
+                <td style="border-bottom: 1px solid black; padding: 0px 2px !important; "></td>
+                <td style="border-bottom: 1px solid black; padding: 0px 2px !important; "></td>
+                <td style="border-bottom: 1px solid black; padding: 0px 2px !important; "><b>{%= data[i].party %}</b></td>
+                <td style="border-bottom: 1px solid black; padding: 0px 2px !important; "><b>{%= data[(i-1)].customer_name %}</b></td>
+                <td style="border-bottom: 1px solid black; padding: 0px 2px !important; "><b>{%= data[i].voucher_no %}</b></td>
+                <td style="text-align: right; border-bottom: 1px solid black; padding: 0px 2px !important; "><b>{%= format_currency(data[i].invoiced) %}</b></td>
+                <td style="text-align: right; border-bottom: 1px solid black; padding: 0px 2px !important; "><b>{%= format_currency(data[i].outstanding) %}</b></td>
             </tr>
             {% } %}
         {% } %}

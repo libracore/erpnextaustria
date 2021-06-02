@@ -15,6 +15,10 @@ def execute(filters=None):
     # aggregate by supplier
     output = []
     suppliers = []
+    overall_totals = {
+        'invoiced': 0,
+        'outstanding': 0
+    }
     for d in data:
         supplier = d['party'] if 'party' in d else d['supplier_name']
         if not supplier in suppliers:
@@ -30,11 +34,19 @@ def execute(filters=None):
                 output.append(d)
                 supplier_totals['invoiced'] += d['invoiced']
                 supplier_totals['outstanding'] += d['outstanding']
+                overall_totals['invoiced'] += d['invoiced']
+                overall_totals['outstanding'] += d['outstanding']
         output.append({
             'party': c,
             'invoiced': supplier_totals['invoiced'],
             'outstanding': supplier_totals['outstanding']
         })
+    # use manual total, automatic sum would be double the actual value
+    output.append({
+        'party': _("Total"),
+        'invoiced': overall_totals['invoiced'],
+        'outstanding': overall_totals['outstanding']
+    })
     return columns, output
 
 def get_columns():
