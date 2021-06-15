@@ -117,6 +117,8 @@ class ATVATDeclaration(Document):
                 doc = append_tax(doc, total_tax_account, 0, total_tax)
                 doc.insert()
                 self.journal_entry = doc.name
+                self.flags.ignore_validate = True
+                self.flags.ignore_validate_update_after_submit = True
                 self.save()
                 doc.submit()
         return
