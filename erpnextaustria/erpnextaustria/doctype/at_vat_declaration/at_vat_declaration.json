@@ -574,6 +574,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "bold": 1,
    "fieldname": "total_tax_due",
    "fieldtype": "Float",
@@ -606,7 +607,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-31 11:00:39.340583",
+ "modified": "2021-06-15 13:33:48.133545",
  "modified_by": "Administrator",
  "module": "ERPNextAustria",
  "name": "AT VAT Declaration",
