@@ -310,6 +310,6 @@ def get_company_address(company):
 
     address_doc = frappe.get_doc("Address", default_address)
     address_dict = address_doc.as_dict()
-    address_dict["country_code"] = frappe.get_value("Country", address_dict.country, "code")
+    address_dict["country_code"] = frappe.get_value("Country", address_dict.country, "code").upper()
 
     return address_dict
