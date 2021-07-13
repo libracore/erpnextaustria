@@ -304,11 +304,11 @@ def download_uva_pdf(uva):
 
 
 def get_company_address(company):
-    deafult_address = get_default_address("Company", company)
-    if not deafult_address:
+    default_address = get_default_address("Company", company)
+    if not default_address:
         return
 
-    address_doc = frappe.get_doc("Address", deafult_address)
+    address_doc = frappe.get_doc("Address", default_address)
     address_dict = address_doc.as_dict()
     address_dict["country_code"] = frappe.get_value("Country", address_dict.country, "code")
 
