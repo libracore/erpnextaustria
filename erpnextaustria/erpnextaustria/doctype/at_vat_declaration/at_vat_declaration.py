@@ -62,9 +62,10 @@ class ATVATDeclaration(Document):
             return
 
         journal_entry = frappe.get_doc({
-            'doctype': "Journal Entry",
-            'is_opening': "Yes",
-            'posting_date': self.end_date
+            "doctype": "Journal Entry",
+            "company": self.company,
+            "is_opening": "Yes",
+            "posting_date": self.end_date
         })
         total_tax_account = None
 
@@ -77,27 +78,33 @@ class ATVATDeclaration(Document):
             if not fields:
                 continue
 
-            debit = fields[0]
-            credit = fields[1]
+            debit_field = fields[0]
+            credit_field = fields[1]
 
-            if debit:
+            if debit_field:
+                debit_amount = self.get(debit_field)
                 journal_entry.append('accounts', {
                     'account': a.account,
-                    'debit_in_account_currency': self.get(debit)
+                    'debit': debit_amount,
+                    'debit_in_account_currency': debit_amount,
                 })
 
-            if credit:
+            if credit_field:
+                credit_amount = self.get(credit_field)
                 journal_entry.append('accounts', {
                     'account': a.account,
-                    'credit_in_account_currency': self.get(credit)
+                    'credit': credit_amount,
+                    'credit_in_account_currency': credit_amount
                 })
 
         # actual tax on tax account
         journal_entry.set_total_debit_credit()
-        journal_entry.append('accounts', {
-            'account': total_tax_account,
-            'credit_in_account_currency': journal_entry.difference
-        })
+        if journal_entry.difference:
+            journal_entry.append('accounts', {
+                'account': total_tax_account,
+                'credit': journal_entry.difference,
+                'credit_in_account_currency': journal_entry.difference
+            })
 
         journal_entry.insert()
 
