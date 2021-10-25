@@ -1,9 +1,9 @@
-// Copyright (c) 2016-2020, libracore and contributors
+// Copyright (c) 2016-2021, libracore and contributors
 // For license information, please see license.txt
 /* eslint-disable */
 
 frappe.query_reports["Kontrolle MwSt AT"] = {
-	"filters": [
+    "filters": [
         {
             "fieldname":"from_date",
             "label": __("From date"),
@@ -32,5 +32,5 @@ frappe.query_reports["Kontrolle MwSt AT"] = {
             "default" : frappe.defaults.get_default("Company"),
             "reqd": 1
         }
-	]
+    ]
 };
