@@ -63,9 +63,9 @@ def get_data(month, year):
           ) AS `Vers. Land`,
           (SELECT `code` FROM `tabCountry` WHERE `tabCountry`.`name` = `tabItem`.`country_of_origin`) AS `Ursp. Land`,
           (IF (`tabPurchase Invoice Item`.`weight_uom` = "g", 
-            (`tabPurchase Invoice Item`.`total_weight` / 1000),
+            FLOOR(`tabPurchase Invoice Item`.`total_weight` / 1000),
             `tabPurchase Invoice Item`.`total_weight`)) AS `Eigenmasse KG`,
-          `tabPurchase Invoice Item`.`qty` AS `Bes. Masseneinheit`,
+          FLOOR(`tabPurchase Invoice Item`.`qty`) AS `Bes. Masseneinheit`,
           FLOOR(`tabPurchase Invoice Item`.`base_net_amount`) AS `amount`,
           FLOOR(`tabPurchase Invoice Item`.`base_net_amount`) AS `value`
         FROM `tabPurchase Invoice Item`
