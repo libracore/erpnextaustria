@@ -87,21 +87,20 @@ def generate_transfer_file(month, year):
     data = get_data(int(month), int(year))
     
     # create csv header
-    content = make_line("KN8-Code;Art des Geschäftes;Statistisches Verfahren;Warenbezeichnung;Handelspartnerland;Ursprungsland;Eigenmasse;Besondere Maßeinheit;Verkehrszweig;Rechnungsbetrag;Statistischer Wert")
+    content = make_line("KN8-Code;Warenbezeichnung;Handelspartnerland;Ursprungsland;Art des Geschäftes;Eigenmasse;Besondere Maßeinheit;Rechnungsbetrag;Statistischer Wert;EmpfängerUID")
     for i in range(0, len(data)):
-        content += make_line("{kn8};{type};{stat};{item_name};{supl_cntry};{source_cntry};{uom};{spec_uom};{traffic};{amount};{value}".format(
-            type="1",
-            stat="40000",
-            kn8=(data[i][2] or '').replace(' ', ''),
-            item_name=data[i][1],
-            supl_cntry=data[i][3],
-            source_cntry=data[i][4],
-            uom=int(data[i][5] or 0),
-            spec_uom=int(data[i][6] or 0),
-            traffic="3",
-            amount=data[i][7],
-            value=data[i][8]
-        ))
+        if data[i][2]:
+            content += make_line("{kn8};{item_name};{supl_cntry};{source_cntry};{type};{uom};{spec_uom};{amount};{value};".format(
+                type="11",
+                kn8=(data[i][2] or '').replace(' ', ''),
+                item_name=data[i][1],
+                supl_cntry=data[i][3],
+                source_cntry=data[i][4],
+                uom=("{:.3f}".format(data[i][5] or 0)).replace(".", ","),
+                spec_uom=("{:.3f}".format(data[i][6] or 0)).replace(".", ","),
+                amount=("{:.2f}".format(data[i][7])).replace(".", ","),
+                value=("{:.2f}".format(data[i][8])).replace(".", ",")
+            ))
  
     return { 'content': content }
 
