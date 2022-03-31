@@ -43,7 +43,9 @@ frappe.ui.form.on('AT VAT Declaration', {
         }
         
         // recalculate fresh values
-        update_total_revenue(frm);
+        if (frm.doc.docstatus === 0) {
+            update_total_revenue(frm);
+        }
     },
     validate: function(frm) {
         console.log(frm.doc);
