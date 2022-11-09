@@ -58,10 +58,10 @@ def get_data(month, year):
           `tabPurchase Invoice Item`.`item_code`,
           `tabPurchase Invoice Item`.`item_name`,
           `tabItem`.`customs_tariff_number` AS `KN8 Code`,
-          (SELECT `code` FROM `tabCountry` WHERE `tabCountry`.`name` = 
+          (SELECT UPPER(`code`) FROM `tabCountry` WHERE `tabCountry`.`name` = 
            (SELECT `country` FROM `tabAddress` WHERE `tabAddress`.`name` = `tabPurchase Invoice`.`supplier_address`)
           ) AS `Vers. Land`,
-          (SELECT `code` FROM `tabCountry` WHERE `tabCountry`.`name` = `tabItem`.`country_of_origin`) AS `Ursp. Land`,
+          (SELECT UPPER(`code`) FROM `tabCountry` WHERE `tabCountry`.`name` = `tabItem`.`country_of_origin`) AS `Ursp. Land`,
           (IF (`tabPurchase Invoice Item`.`weight_uom` = "g", 
             FLOOR(`tabPurchase Invoice Item`.`total_weight` / 1000),
             `tabPurchase Invoice Item`.`total_weight`)) AS `Eigenmasse KG`,
