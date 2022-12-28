@@ -46,7 +46,8 @@ def get_data(filters):
              WHERE 
                 `tabComment`.`reference_name` = `tabGL Entry`.`voucher_no`
                 AND `tabComment`.`reference_doctype` = `tabGL Entry`.`voucher_type`
-             ORDER BY `tabComment`.`creation` DESC
+                AND `tabComment`.`comment_type` IN ("Attachment", "Comment")
+             ORDER BY `tabComment`.`comment_type` DESC, `tabComment`.`creation` DESC
              LIMIT 1) AS `comment`
         FROM `tabGL Entry`
         LEFT JOIN `tabCustomer` ON `tabCustomer`.`name` = `tabGL Entry`.`against`
