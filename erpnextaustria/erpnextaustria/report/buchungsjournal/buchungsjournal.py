@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint
 
 def execute(filters=None):
     columns = get_columns(filters)
@@ -27,7 +28,11 @@ def get_columns(filters):
     ]
 
 def get_data(filters):
-   
+    if cint(filters.attachments) == 1:
+        comment_types = """("Attachment", "Comment")"""
+    else:
+        comment_types = """("Comment")"""
+        
     data = []
 
     # get positions
@@ -46,7 +51,7 @@ def get_data(filters):
              WHERE 
                 `tabComment`.`reference_name` = `tabGL Entry`.`voucher_no`
                 AND `tabComment`.`reference_doctype` = `tabGL Entry`.`voucher_type`
-                AND `tabComment`.`comment_type` IN ("Attachment", "Comment")
+                AND `tabComment`.`comment_type` IN {comment_types}
              ORDER BY `tabComment`.`comment_type` DESC, `tabComment`.`creation` DESC
              LIMIT 1) AS `comment`
         FROM `tabGL Entry`
@@ -56,7 +61,8 @@ def get_data(filters):
           `tabGL Entry`.`docstatus` = 1
           AND DATE(`tabGL Entry`.`posting_date`) >= "{from_date}"
           AND DATE(`tabGL Entry`.`posting_date`) <= "{to_date}"
-        ORDER BY `tabGL Entry`.`posting_date` ASC;""".format(from_date=filters.from_date, to_date=filters.to_date), as_dict=True)
+        ORDER BY `tabGL Entry`.`posting_date` ASC;""".format(comment_types=comment_types,
+            from_date=filters.from_date, to_date=filters.to_date), as_dict=True)
 
     for position in positions:
 

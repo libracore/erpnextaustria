@@ -25,6 +25,11 @@ frappe.query_reports["Buchungsjournal"] = {
             "fieldtype": "Date",
             "default": frappe.datetime.get_today(),
             "reqd": 1
+        },
+        {
+            "fieldname":"attachments",
+            "label": __("Attachments"),
+            "fieldtype": "Check"
         }
     ]
 };
