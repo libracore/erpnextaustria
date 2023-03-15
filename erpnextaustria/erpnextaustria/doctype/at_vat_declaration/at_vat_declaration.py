@@ -306,7 +306,7 @@ def download_uva_pdf(uva):
         'Zahl140': get_at_value(doc.corrections_1),            # 063
         'Zahl141': get_at_value(doc.corrections_2),            # 067
         'Zahl142': get_at_value(doc.total_deductable_pretax),  # (5.13)
-        'Text143': doc.description_other_correction,
+        'Text143': doc.description_other_correction or "",
         'Zahl143': get_at_value(doc.tax_other_corrections),    # 090
         'Zahl144': get_at_value(doc.total_tax_due),            # 095
         'Checkbox100X': 2 if doc.total_tax_due > 0 else 0,      # (7.1)
