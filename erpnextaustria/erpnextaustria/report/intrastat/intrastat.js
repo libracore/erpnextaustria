@@ -1,9 +1,9 @@
-// Copyright (c) 2018, libracore and contributors
+// Copyright (c) 2018-2023, libracore and contributors
 // For license information, please see license.txt
 /* eslint-disable */
 
 frappe.query_reports["Intrastat"] = {
-	"filters": [
+    "filters": [
         {
             "fieldname":"month",
             "label": __("Month"),
@@ -17,13 +17,21 @@ frappe.query_reports["Intrastat"] = {
             "fieldtype": "Int",
             "reqd": 1,
             "default": new Date().getFullYear()
+        },
+        {
+            "fieldname":"mode",
+            "label": __("Mode"),
+            "fieldtype": "Select",
+            "options": "In\nOut",
+            "reqd": 1,
+            "default": "In"
         }
-	],
-	onload: function(report) {
-		report.page.add_inner_button(__("Download CSV"), function() {
-			download_csv(report);
-		});
-	}
+    ],
+    onload: function(report) {
+        report.page.add_inner_button(__("Download CSV"), function() {
+            download_csv(report);
+        });
+    }
 }
 
 /* download csv form */
@@ -34,9 +42,9 @@ function download_csv(report) {
     frappe.call({
         method: 'erpnextaustria.erpnextaustria.report.intrastat.intrastat.generate_transfer_file',
         args: {
-			'month': filters.month,
-			'year': filters.year
-		},
+            'month': filters.month,
+            'year': filters.year
+        },
         callback: function(r) {
             if (r.message) {
                 // prepare the xml file for download

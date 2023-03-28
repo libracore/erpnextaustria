@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2017-2021, libracore and contributors
+# Copyright (c) 2017-2023, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -40,11 +40,11 @@ def execute(filters=None):
     else:
         year2 = year
         
-    data = get_data(month, year)
+    data = get_data(month, year, filters.mode)
 
     return columns, data
 
-def get_data(month, year):
+def get_data(month, year, mode):
     # prepare timeframe
     month2 = month + 1
     if month2 > 12:
@@ -54,29 +54,52 @@ def get_data(month, year):
         year2 = year
     
     # prepare query
-    sql_query = """SELECT 
-          `tabPurchase Invoice Item`.`item_code`,
-          `tabPurchase Invoice Item`.`item_name`,
-          `tabItem`.`customs_tariff_number` AS `KN8 Code`,
-          (SELECT UPPER(`code`) FROM `tabCountry` WHERE `tabCountry`.`name` = 
-           (SELECT `country` FROM `tabAddress` WHERE `tabAddress`.`name` = `tabPurchase Invoice`.`supplier_address`)
-          ) AS `Vers. Land`,
-          (SELECT UPPER(`code`) FROM `tabCountry` WHERE `tabCountry`.`name` = `tabItem`.`country_of_origin`) AS `Ursp. Land`,
-          (IF (`tabPurchase Invoice Item`.`weight_uom` = "g", 
-            FLOOR(`tabPurchase Invoice Item`.`total_weight` / 1000),
-            `tabPurchase Invoice Item`.`total_weight`)) AS `Eigenmasse KG`,
-          FLOOR(`tabPurchase Invoice Item`.`qty`) AS `Bes. Masseneinheit`,
-          FLOOR(`tabPurchase Invoice Item`.`base_net_amount`) AS `amount`,
-          FLOOR(`tabPurchase Invoice Item`.`base_net_amount`) AS `value`
-        FROM `tabPurchase Invoice Item`
-        LEFT JOIN `tabPurchase Invoice` ON `tabPurchase Invoice Item`.`parent` = `tabPurchase Invoice`.`name`
-        LEFT JOIN `tabItem` ON `tabPurchase Invoice Item`.`item_code` = `tabItem`.`item_code`
-        WHERE `tabPurchase Invoice`.`docstatus` = 1
-          AND `tabPurchase Invoice`.`taxes_and_charges` LIKE '%070%'
-          AND `tabPurchase Invoice`.`posting_date` >= '{year}-{month}-01'
-          AND `tabPurchase Invoice`.`posting_date` < '{year2}-{month2}-01'
-        ;""".format(year=year, month=month, year2=year2, month2=month2)
-
+    if mode == "In":
+        sql_query = """SELECT 
+              `tabPurchase Invoice Item`.`item_code`,
+              `tabPurchase Invoice Item`.`item_name`,
+              `tabItem`.`customs_tariff_number` AS `KN8 Code`,
+              (SELECT UPPER(`code`) FROM `tabCountry` WHERE `tabCountry`.`name` = 
+               (SELECT `country` FROM `tabAddress` WHERE `tabAddress`.`name` = `tabPurchase Invoice`.`supplier_address`)
+              ) AS `Vers. Land`,
+              (SELECT UPPER(`code`) FROM `tabCountry` WHERE `tabCountry`.`name` = `tabItem`.`country_of_origin`) AS `Ursp. Land`,
+              (IF (`tabPurchase Invoice Item`.`weight_uom` = "g", 
+                FLOOR(`tabPurchase Invoice Item`.`total_weight` / 1000),
+                `tabPurchase Invoice Item`.`total_weight`)) AS `Eigenmasse KG`,
+              FLOOR(`tabPurchase Invoice Item`.`qty`) AS `Bes. Masseneinheit`,
+              FLOOR(`tabPurchase Invoice Item`.`base_net_amount`) AS `amount`,
+              FLOOR(`tabPurchase Invoice Item`.`base_net_amount`) AS `value`
+            FROM `tabPurchase Invoice Item`
+            LEFT JOIN `tabPurchase Invoice` ON `tabPurchase Invoice Item`.`parent` = `tabPurchase Invoice`.`name`
+            LEFT JOIN `tabItem` ON `tabPurchase Invoice Item`.`item_code` = `tabItem`.`item_code`
+            WHERE `tabPurchase Invoice`.`docstatus` = 1
+              AND `tabPurchase Invoice`.`taxes_and_charges` LIKE '%070%'
+              AND `tabPurchase Invoice`.`posting_date` >= '{year}-{month}-01'
+              AND `tabPurchase Invoice`.`posting_date` < '{year2}-{month2}-01'
+            ;""".format(year=year, month=month, year2=year2, month2=month2)
+    else:
+        sql_query = """SELECT 
+              `tabSales Invoice Item`.`item_code`,
+              `tabSales Invoice Item`.`item_name`,
+              `tabItem`.`customs_tariff_number` AS `KN8 Code`,
+              (SELECT UPPER(`code`) FROM `tabCountry` WHERE `tabCountry`.`name` = 
+               (SELECT `country` FROM `tabAddress` WHERE `tabAddress`.`name` = `tabSales Invoice`.`customer_address`)
+              ) AS `Vers. Land`,
+              (SELECT UPPER(`code`) FROM `tabCountry` WHERE `tabCountry`.`name` = `tabItem`.`country_of_origin`) AS `Ursp. Land`,
+              (IF (`tabSales Invoice Item`.`weight_uom` = "g", 
+                FLOOR(`tabSales Invoice Item`.`total_weight` / 1000),
+                `tabSales Invoice Item`.`total_weight`)) AS `Eigenmasse KG`,
+              FLOOR(`tabSales Invoice Item`.`qty`) AS `Bes. Masseneinheit`,
+              FLOOR(`tabSales Invoice Item`.`base_net_amount`) AS `amount`,
+              FLOOR(`tabSales Invoice Item`.`base_net_amount`) AS `value`
+            FROM `tabSales Invoice Item`
+            LEFT JOIN `tabSales Invoice` ON `tabSales Invoice Item`.`parent` = `tabSales Invoice`.`name`
+            LEFT JOIN `tabItem` ON `tabSales Invoice Item`.`item_code` = `tabItem`.`item_code`
+            WHERE `tabSales Invoice`.`docstatus` = 1
+              AND `tabSales Invoice`.`taxes_and_charges` LIKE '%017%'
+              AND `tabSales Invoice`.`posting_date` >= '{year}-{month}-01'
+              AND `tabSales Invoice`.`posting_date` < '{year2}-{month2}-01'
+            ;""".format(year=year, month=month, year2=year2, month2=month2)
     # run query, as list, otherwise export to Excel fails 
     data = frappe.db.sql(sql_query, as_list = True)
     return data

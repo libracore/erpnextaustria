@@ -30,7 +30,7 @@ def get_data():
                 },
                 {
                     "type": "report",
-                    "doctype": "Purchase Invoice",
+                    "doctype": "GL Entry",
                     "name": "Intrastat",
                     "label": _("Intrastat"),
                     "description": _("Intrastat"),
