@@ -76,13 +76,12 @@ def get_data(month, year, mode, aggregate=0):
               FLOOR(SUM(`tabPurchase Invoice Item`.`qty`)) AS `bess_mass`,
               FLOOR(SUM(`tabPurchase Invoice Item`.`base_net_amount`)) AS `amount`,
               FLOOR(SUM(`tabPurchase Invoice Item`.`base_net_amount`)) AS `value`,
-              `tabCompany`.`tax_id` AS `uid`,
+              NULL AS `uid`,        /* MUST BE EMPTY */
               "Purchase Invoice" AS `dt`,
               `tabPurchase Invoice`.`name` AS `dn`
             FROM `tabPurchase Invoice Item`
             LEFT JOIN `tabPurchase Invoice` ON `tabPurchase Invoice Item`.`parent` = `tabPurchase Invoice`.`name`
             LEFT JOIN `tabItem` ON `tabPurchase Invoice Item`.`item_code` = `tabItem`.`item_code`
-            LEFT JOIN `tabCompany` ON `tabPurchase Invoice`.`company` = `tabCompany`.`name`
             WHERE `tabPurchase Invoice`.`docstatus` = 1
               AND `tabPurchase Invoice`.`taxes_and_charges` LIKE '%070%'
               AND `tabPurchase Invoice`.`posting_date` >= '{year}-{month}-01'
@@ -132,7 +131,7 @@ def generate_transfer_file(month, year, mode, aggregate=0):
     # create csv header
     content = make_line("KN8-Code;Warenbezeichnung;Handelspartnerland;Ursprungsland;Art des Geschäftes;Eigenmasse;Besondere Maßeinheit;Rechnungsbetrag;Statistischer Wert;EmpfängerUID")
     for i in range(0, len(data)):
-        if data[i]['kn8']:
+        if data[i]['kn8'] and (data[i]['value'] or 0) >= 0 and (data[i]['bess_mass'] or 0) >= 0:
             content += make_line("{kn8};{item_name};{supl_cntry};{source_cntry};{type};{uom};{spec_uom};{amount};{value};{uid}".format(
                 type="11",
                 kn8=(data[i]['kn8'] or '').replace(' ', ''),
@@ -143,7 +142,7 @@ def generate_transfer_file(month, year, mode, aggregate=0):
                 spec_uom=("{:.3f}".format(data[i]['bess_mass'] or 0)).replace(".", ","),
                 amount=("{:.2f}".format(data[i]['amount'])).replace(".", ","),
                 value=("{:.2f}".format(data[i]['value'])).replace(".", ","),
-                uid=data[i]['uid']
+                uid=(data[i]['uid'] or "")
             ))
  
     return { 'content': content }
