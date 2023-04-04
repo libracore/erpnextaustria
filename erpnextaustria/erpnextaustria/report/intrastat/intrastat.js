@@ -25,6 +25,11 @@ frappe.query_reports["Intrastat"] = {
             "options": "In\nOut",
             "reqd": 1,
             "default": "In"
+        },
+        {
+            "fieldname":"aggregate",
+            "label": __("Aggregate"),
+            "fieldtype": "Check"
         }
     ],
     onload: function(report) {
@@ -43,7 +48,9 @@ function download_csv(report) {
         method: 'erpnextaustria.erpnextaustria.report.intrastat.intrastat.generate_transfer_file',
         args: {
             'month': filters.month,
-            'year': filters.year
+            'year': filters.year,
+            'mode': filters.mode,
+            'aggregate': filters.aggregate
         },
         callback: function(r) {
             if (r.message) {
