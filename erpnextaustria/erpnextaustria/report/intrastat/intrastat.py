@@ -131,7 +131,7 @@ def generate_transfer_file(month, year, mode, aggregate=0):
     # create csv header
     content = make_line("KN8-Code;Warenbezeichnung;Handelspartnerland;Ursprungsland;Art des Geschäftes;Eigenmasse;Besondere Maßeinheit;Rechnungsbetrag;Statistischer Wert;EmpfängerUID")
     for i in range(0, len(data)):
-        if data[i]['kn8'] and (data[i]['value'] or 0) >= 0 and (data[i]['bess_mass'] or 0) >= 0:
+        if data[i]['kn8'] and (data[i]['value'] or 0) > 0 and (data[i]['bess_mass'] or 0) > 0:
             content += make_line("{kn8};{item_name};{supl_cntry};{source_cntry};{type};{uom};{spec_uom};{amount};{value};{uid}".format(
                 type="11",
                 kn8=(data[i]['kn8'] or '').replace(' ', ''),
@@ -142,7 +142,7 @@ def generate_transfer_file(month, year, mode, aggregate=0):
                 spec_uom=("{:.3f}".format(data[i]['bess_mass'] or 0)).replace(".", ","),
                 amount=("{:.2f}".format(data[i]['amount'])).replace(".", ","),
                 value=("{:.2f}".format(data[i]['value'])).replace(".", ","),
-                uid=(data[i]['uid'] or "")
+                uid=(data[i]['uid'] or "").replace(" ", "")
             ))
  
     return { 'content': content }
