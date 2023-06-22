@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2018, Fink Zeitsysteme/libracore and contributors
+# Copyright (c) 2018-2023, Fink Zeitsysteme/libracore and contributors
 # For license information, please see license.txt
 #
 # Import exchange rates
@@ -172,23 +172,23 @@ def make_line(line):
 
 @frappe.whitelist()
 def get_eur_exchange_rate(currency):
-    url = "https://www.oenb.at/zinssaetzewechselkurse/zinssaetzewechselkurse?mode=wechselkurse"
+    url = "https://www.oenb.at/isaweb/reportExcelHtml.do?report=2.14.9&sort=ASC&dynValue=0&lang=DE&linesPerPage=allen&timeSeries=All&page=1"
     page = requests.get(url)
     if page.status_code == 200:
         # all good, parse
         soup = BeautifulSoup(page.text, 'lxml')
         # find all currency nodes
-        currency_rows = soup.find_all('tr', class_='text')
+        currency_rows = soup.find_all('tr')
         # evaluate each node
         for cr in currency_rows:
             # parse fields
             fields = cr.find_all('td')
-            # only use rows with 3 cells
-            if len(fields) == 3:
+            # only use rows with 11 cells
+            if len(fields) == 11:
                 # parse currency code and exchange rate
                 try:
                     currency_code = fields[1].get_text().replace('\n', '').replace('\r', '').replace('\t', '')
-                    raw = fields[2].get_text().replace('\n', '').replace('\r', '').replace('\t', '').replace('.', '').replace(',', '.')
+                    raw = fields[-1].get_text().replace('\n', '').replace('\r', '').replace('\t', '').replace('.', '').replace(',', '.')
                     exchange_rate = float(raw)
                     # return if matched
                     print("{0}: 1 EUR = {1} {0}".format(currency_code, exchange_rate))
