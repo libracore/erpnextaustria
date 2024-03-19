@@ -266,4 +266,8 @@ def get_general_ledger_csv(fiscal_year, company):
             (t.get("remarks") or "").replace(";", " ")
         ]) + "\r\n"
     
-    return output
+    # return download
+    frappe.local.response.filename = "{0}.csv".format(fiscal_year)
+    frappe.local.response.filecontent = output
+    frappe.local.response.type = "download"
+

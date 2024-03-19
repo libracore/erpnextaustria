@@ -10,31 +10,15 @@
         }
     });
 
-    function download(filename, text) {
-      var element = document.createElement('a');
-      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-      element.setAttribute('download', filename);
-
-      element.style.display = 'none';
-      document.body.appendChild(element);
-
-      element.click();
-
-      document.body.removeChild(element);
-    }
-
     function download_csv(frm) {
-        frappe.call({
-            "method": "erpnextaustria.erpnextaustria.utils.get_general_ledger_csv",
-            "args": {
-                "fiscal_year": frm.doc.name,
-                "company": "MyCompany"
-            },
-            "freeze": true,
-            "freeze_message": __("Generating..."),
-            "callback": function(response) {
-                download(cur_frm.doc.name + ".csv", response.message);
-            }
-        });
-        
+        // html-content of the label
+        var url = "/api/method/erpnextaustria.erpnextaustria.utils.get_general_ledger_csv"  
+                + "?fiscal_year=" + encodeURIComponent(frm.doc.name)
+                + "&company=MyCompany";
+        var w = window.open(
+             frappe.urllib.get_full_url(url)
+        );
+        if (!w) {
+            frappe.msgprint(__("Please enable pop-ups")); return;
+        }
     }
