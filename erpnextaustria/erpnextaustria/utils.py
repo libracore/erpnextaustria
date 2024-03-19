@@ -13,6 +13,7 @@ from zeep import Client
 import requests
 from bs4 import BeautifulSoup
 from time import strftime
+from frappe.utils import rounded
 
 # UID validation
 #
@@ -231,3 +232,38 @@ def create_exchange_rate(to_currency, rate, from_currency="EUR"):
         print(err.message)
         record = None
     return record
+
+@frappe.whitelist()
+def get_general_ledger_csv(fiscal_year, company):
+    fiscal_year_doc = frappe.get_doc("Fiscal Year", fiscal_year)
+    transactions = frappe.db.sql("""
+        SELECT *
+        FROM `tabGL Entry`
+        WHERE `posting_date` BETWEEN "{from_date}" AND "{to_date}"
+        ORDER BY `posting_date` ASC;
+        """.format(
+            from_date=fiscal_year_doc.year_start_date,
+            to_date=fiscal_year_doc.year_end_date), as_dict=True)
+            
+    output = ";".join([
+        "Buchungsdatum",
+        "Konto",
+        "Soll",
+        "Haben", 
+        "Dokument",
+        "Gegenkonto",
+        "Bemerkungen"
+    ]) + "\r\n"
+    
+    for t in transactions:
+        output += ";".join([
+            "{0}".format(t.get("posting_date")),
+            "{0}".format(t.get("account")),
+            "{0:.2f}".format(rounded((t.get("debit") or 0), 2)),
+            "{0:.2f}".format(rounded((t.get("credit") or 0), 2)), 
+            "{0}".format(t.get("voucher_no")),
+            "{0}".format(t.get("against")),
+            (t.get("remarks") or "").replace(";", " ")
+        ]) + "\r\n"
+    
+    return output
