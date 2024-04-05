@@ -3,7 +3,7 @@ FIBU: {{ fiscal_year.name }}
 Überschrift: Kontoblatt
 Von Periode: {{ fiscal_year.year_start_date }}
 Bis Periode: {{ fiscal_year.year_start_date }}
-Kto-Nr;GKto-Nr;Buchungssymbol;Beleg;Beleg-Dat.;Buchungstext;
+Kto-Nr;GKto-Nr;Buchungssymbol;Beleg;Beleg-Dat.;Buchungstext;Buchung-Soll;Buchung-Haben;Sy;Proz;GW-Skonto/Steuer;Saldo
 {% for d in data %}
 {{- (d.account_number or "") }};
 {{- (d.against_number or "") }};
@@ -11,4 +11,10 @@ Kto-Nr;GKto-Nr;Buchungssymbol;Beleg;Beleg-Dat.;Buchungstext;
 {{- (d.voucher_no or "") }};
 {{- d.posting_date.strftime("%d.%m.%Y") }};
 {{- (d.remarks or "") }};
+{{- ("{:.2f}".format(d.debit)).replace(".", ",") if d.debit else "" }};
+{{- ("{:.2f}".format(d.credit)).replace(".", ",") if d.credit else "" }};
+{{- (d.sy or "") }};
+{{- ("{:.2f}".format(d.tax_percent)).replace(".", ",") if d.tax_percent else "" }};
+{{- ("{:.2f}".format(d.tax_amount)).replace(".", ",") if d.tax_amount else "" }};
+{{- ("{:.2f}".format(d.balance or 0)).replace(".", ",") }};
 {% endfor %}

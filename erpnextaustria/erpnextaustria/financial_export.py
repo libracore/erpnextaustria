@@ -135,22 +135,27 @@ def create_account_sheet_file(fiscal_year, company):
     # prepare debtors
     account_sheet = frappe.db.sql("""
             SELECT
+                `name`,
                 `posting_date`,
                 `account`,
                 `against`,
                 `voucher_type`,
                 `voucher_no`,
-                `remarks`
+                `remarks`,
+                `debit`,
+                `credit`,
+                `creation`
             FROM `tabGL Entry`
             WHERE
                 `company` = "{company}"
                 AND `posting_date` BETWEEN "{from_date}" AND "{to_date}"
-            ORDER BY `account` ASC, `posting_date` ASC
+            ORDER BY `account` ASC, `posting_date` ASC, `creation` ASC
         """.format(
             company=company, 
             from_date=frappe.get_value("Fiscal Year", fiscal_year, "year_start_date"), 
             to_date=frappe.get_value("Fiscal Year", fiscal_year, "year_end_date")
         ), as_dict=True)
+    balances = {}
     for a in account_sheet:
         record = {
             'posting_date': a.posting_date,
@@ -158,9 +163,41 @@ def create_account_sheet_file(fiscal_year, company):
             'against_number': (a.against or "").split(" ")[0],
             'voucher_type': (a.voucher_no or "").split("-")[0],
             'voucher_no': (a.voucher_no or ""),
-            'remarks': make_safe_string(a.remarks)
+            'remarks': make_safe_string(a.remarks),
+            'debit': a.debit,
+            'credit': (-1) * a.credit
         }
+        
+        # get tax
+        if (a.voucher_type in ['Sales Invoice', 'Purchase Invoice']):
+            doc = frappe.get_doc(a.voucher_type, a.voucher_no)
+            tax_percent = None
+            if doc.taxes and len(doc.taxes) > 0:
+                tax_percent = doc.taxes[0].rate
+                tax_amount = doc.taxes[0].base_tax_amount_after_discount_amount     # note: this is document, not account-level!
             
+            record.update({
+                'tax_percent': tax_percent,
+                'tax_amount': ((a.debit - a.credit) * tax_percent/100) if tax_percent else None
+            })
+        
+        if a.account not in balances:
+            # derive opening account balance
+            opening_balance = frappe.db.sql("""
+                SELECT
+                    IFNULL(SUM(`debit`) - SUM(`credit`), 0) AS `balance`
+                FROM `tabGL Entry`
+                WHERE
+                    `company` = "{company}"
+                    AND `account` = "{account}"
+                    AND `posting_date` < "{start_date}"
+                ;
+            """.format(company=company, account=a.account, start_date=frappe.get_value("Fiscal Year", fiscal_year, "year_start_date")), as_dict=True)
+            balances[a.account] = opening_balance[0]['balance']
+        
+        balances[a.account] += (a.debit - a.credit)
+        record.update({'balance': balances[a.account]})
+        
         data.append(record)
         
     # render template
@@ -174,6 +211,76 @@ def create_account_sheet_file(fiscal_year, company):
     
     # write file
     filename = "/tmp/ACL_Kontoblatt_{0}_{1}.csv".format(company, fiscal_year)
+    f = open(filename, "w", encoding="utf-8")              # cp1252 would be required, but cannot encode all required chars
+    f.write(output_accounts)
+    f.close()
+    return filename
+
+def create_journal_file(fiscal_year, company):
+    data = []
+    # prepare debtors
+    account_sheet = frappe.db.sql("""
+            SELECT
+                `name`,
+                `posting_date`,
+                `account`,
+                `against`,
+                `voucher_type`,
+                `voucher_no`,
+                `remarks`,
+                `debit`,
+                `credit`,
+                `creation`
+            FROM `tabGL Entry`
+            WHERE
+                `company` = "{company}"
+                AND `posting_date` BETWEEN "{from_date}" AND "{to_date}"
+            ORDER BY `name` ASC
+        """.format(
+            company=company, 
+            from_date=frappe.get_value("Fiscal Year", fiscal_year, "year_start_date"), 
+            to_date=frappe.get_value("Fiscal Year", fiscal_year, "year_end_date")
+        ), as_dict=True)
+    balances = {}
+    for a in account_sheet:
+        record = {
+            'name': a.name,
+            'posting_date': a.posting_date,
+            'account_number': (a.account or "").split(" ")[0],
+            'against_number': (a.against or "").split(" ")[0],
+            'voucher_type': (a.voucher_no or "").split("-")[0],
+            'voucher_no': (a.voucher_no or ""),
+            'remarks': make_safe_string(a.remarks),
+            'debit': a.debit,
+            'credit': (-1) * a.credit
+        }
+        
+        # get tax
+        if (a.voucher_type in ['Sales Invoice', 'Purchase Invoice']):
+            doc = frappe.get_doc(a.voucher_type, a.voucher_no)
+            tax_percent = None
+            if doc.taxes and len(doc.taxes) > 0:
+                tax_percent = doc.taxes[0].rate
+                tax_amount = doc.taxes[0].base_tax_amount_after_discount_amount     # note: this is document, not account-level!
+            
+            record.update({
+                'tax_percent': tax_percent,
+                'tax_amount': ((a.debit - a.credit) * tax_percent/100) if tax_percent else None
+            })
+        
+        data.append(record)
+        
+    # render template
+    output_accounts = frappe.render_template("erpnextaustria/templates/xml/journal_export.html", 
+        {
+            'fiscal_year': frappe.get_doc("Fiscal Year", fiscal_year),
+            'company': company,
+            'data': data
+        }
+    )
+    
+    # write file
+    filename = "/tmp/ACL_JOurnal_{0}_{1}.csv".format(company, fiscal_year)
     f = open(filename, "w", encoding="utf-8")              # cp1252 would be required, but cannot encode all required chars
     f.write(output_accounts)
     f.close()
