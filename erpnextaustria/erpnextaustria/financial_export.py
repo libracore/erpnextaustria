@@ -8,9 +8,18 @@
 import frappe
 from erpnextswiss.scripts.crm_tools import get_primary_customer_address, get_primary_supplier_address
 
+ROOT_TYPES = {
+    'Asset': "1",
+    'Liability': "2",
+    'Income': "4",
+    'Expense': "3",
+    'Equity': "2"
+}
+
 @frappe.whitelist()
 def create_financial_export(fiscal_year, company):
     dbt_crt_file = create_debtors_creditors_file(fiscal_year, company)
+    acts_file = create_accounts_file(fiscal_year, company)
     
     # create zip archie
     
@@ -84,6 +93,40 @@ def create_debtors_creditors_file(fiscal_year, company):
     filename = "/tmp/ACL_Personenkonten_{0}_{1}.csv".format(company, fiscal_year)
     f = open(filename, "w", encoding="utf-8")              # cp1252 would be required, but cannot encode all required chars
     f.write(output_debtors_creditors)
+    f.close()
+    return filename
+
+def create_accounts_file(fiscal_year, company):
+    data = []
+    # prepare debtors
+    accounts = frappe.get_all("Account", 
+        filters={'company': company},
+        fields=['name', 'account_name', 'account_number', 'root_type', 'account_type'],
+        order_by='account_number')
+    for a in accounts:
+        if a.account_number:                            # only export with account numbers (leave structural elements)
+            record = {
+                'account': make_safe_string(a.account_number),
+                'name': make_safe_string(a.account_name),
+                'root_type': ROOT_TYPES[a.root_type],
+                'account_type': make_safe_string(a.account_type)
+            }
+                
+            data.append(record)
+        
+    # render template
+    output_accounts = frappe.render_template("erpnextaustria/templates/xml/accounts_export.html", 
+        {
+            'fiscal_year': frappe.get_doc("Fiscal Year", fiscal_year),
+            'company': company,
+            'data': data
+        }
+    )
+    
+    # write file
+    filename = "/tmp/ACL_Sachkonten_{0}_{1}.csv".format(company, fiscal_year)
+    f = open(filename, "w", encoding="utf-8")              # cp1252 would be required, but cannot encode all required chars
+    f.write(output_accounts)
     f.close()
     return filename
     
