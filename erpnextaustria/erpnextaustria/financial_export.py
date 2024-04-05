@@ -129,6 +129,55 @@ def create_accounts_file(fiscal_year, company):
     f.write(output_accounts)
     f.close()
     return filename
+
+def create_account_sheet_file(fiscal_year, company):
+    data = []
+    # prepare debtors
+    account_sheet = frappe.db.sql("""
+            SELECT
+                `posting_date`,
+                `account`,
+                `against`,
+                `voucher_type`,
+                `voucher_no`,
+                `remarks`
+            FROM `tabGL Entry`
+            WHERE
+                `company` = "{company}"
+                AND `posting_date` BETWEEN "{from_date}" AND "{to_date}"
+            ORDER BY `account` ASC, `posting_date` ASC
+        """.format(
+            company=company, 
+            from_date=frappe.get_value("Fiscal Year", fiscal_year, "year_start_date"), 
+            to_date=frappe.get_value("Fiscal Year", fiscal_year, "year_end_date")
+        ), as_dict=True)
+    for a in account_sheet:
+        record = {
+            'posting_date': a.posting_date,
+            'account_number': (a.account or "").split(" ")[0],
+            'against_number': (a.against or "").split(" ")[0],
+            'voucher_type': (a.voucher_no or "").split("-")[0],
+            'voucher_no': (a.voucher_no or ""),
+            'remarks': make_safe_string(a.remarks)
+        }
+            
+        data.append(record)
+        
+    # render template
+    output_accounts = frappe.render_template("erpnextaustria/templates/xml/account_sheet_export.html", 
+        {
+            'fiscal_year': frappe.get_doc("Fiscal Year", fiscal_year),
+            'company': company,
+            'data': data
+        }
+    )
+    
+    # write file
+    filename = "/tmp/ACL_Kontoblatt_{0}_{1}.csv".format(company, fiscal_year)
+    f = open(filename, "w", encoding="utf-8")              # cp1252 would be required, but cannot encode all required chars
+    f.write(output_accounts)
+    f.close()
+    return filename
     
 def make_safe_string(s):
     return (s or "").replace(";", " ").replace("\n", " ").replace("\r", " ").replace("\"", "")

@@ -1,0 +1,14 @@
+Firma: {{ company }}
+FIBU: {{ fiscal_year.name }}
+Überschrift: Sachkonten
+Konto;Bezeichnung;Kontoart;Kontoklasse;USt-Steuercode;USt-Prozentsatz;UST-Prozentsatz fix;UST-Steuercode fix;
+{% for d in data %}
+{{- (d.account or "") }};
+{{- (d.name or "") }};
+{{- (d.root_type or "") }};
+{{- (d.account_type or "") }};
+{{- (d.vat_code or "") }};
+{{- (d.vat_percent or "") }};
+{{- (d.vat_percent_fix or "") }};
+{{- (d.vat_code_fix or "") }};
+{% endfor %}

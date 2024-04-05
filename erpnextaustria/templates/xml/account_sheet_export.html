@@ -1,0 +1,14 @@
+Firma: {{ company }}
+FIBU: {{ fiscal_year.name }}
+Überschrift: Kontoblatt
+Von Periode: {{ fiscal_year.year_start_date }}
+Bis Periode: {{ fiscal_year.year_start_date }}
+Kto-Nr;GKto-Nr;Buchungssymbol;Beleg;Beleg-Dat.;Buchungstext;
+{% for d in data %}
+{{- (d.account_number or "") }};
+{{- (d.against_number or "") }};
+{{- (d.voucher_type or "") }};
+{{- (d.voucher_no or "") }};
+{{- d.posting_date.strftime("%d.%m.%Y") }};
+{{- (d.remarks or "") }};
+{% endfor %}
