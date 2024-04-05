@@ -1,0 +1,19 @@
+Firma: {{ company }}
+FIBU: {{ fiscal_year.name }}
+Überschrift: Personenkonten
+Konto;Nachname;Straße;Postleitzahl;Ort;UID-Nummer;Vorname;Land;Zlg-Ziel;Skonto-Tage-1;Skonto-Prozent-1;Skonto-Tage-2;Skonto-Prozent-2;
+{% for d in data %}
+{{- (d.account or "") }};
+{{- (d.name or "") }};
+{{- (d.street or "") }};
+{{- (d.pincode or "") }};
+{{- (d.city or "") }};
+{{- (d.uid or "") }};
+{{- (d.first_name or "") }};
+{{- (d.country or "") }};
+{{- (d.payment_terms or "") }};
+{{- ("{:.2f}".format(d.skonto_days_1 or 0)).replace(".", ",") }};
+{{- ("{:.2f}".format(d.skonto_precent_1 or 0)).replace(".", ",") }};
+{{- ("{:.2f}".format(d.skonto_days_2 or 0)).replace(".", ",") }};
+{{- ("{:.2f}".format(d.skonto_percent_2 or 0)).replace(".", ",") }};
+{% endfor %}
