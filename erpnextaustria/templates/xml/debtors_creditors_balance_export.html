@@ -1,0 +1,17 @@
+Firma: {{ company }}
+FIBU: {{ fiscal_year.name }}
+Überschrift: Personensaldenliste
+Von Periode: {{ fiscal_year.year_start_date }}
+Bis Periode: {{ fiscal_year.year_end_date }}
+Kto-Nr;Kontobezeichnung;EB;Ges.-Soll;Ges.-Haben;Monat-Soll;Monat-Haben;Saldo Soll;Saldo Haben
+{% for d in data %}
+{{- (d.account or "") }};
+{{- (d.name or "") }};
+{{- ("{:.2f}".format(d.opening_balance or 0)).replace(".", ",") }};
+{{- ("{:.2f}".format(d.total_debit or 0)).replace(".", ",") }};
+{{- ("{:.2f}".format(d.total_credit or 0)).replace(".", ",") }};
+{{- ("{:.2f}".format(d.month_debit)).replace(".", ",") if d.month_debit else "" }};
+{{- ("{:.2f}".format(d.month_credit)).replace(".", ",") if d.month_debit else "" }};
+{{- ("{:.2f}".format(d.balance_debit)).replace(".", ",") if d.month_debit else "" }};
+{{- ("{:.2f}".format(d.balance_credit)).replace(".", ",") if d.month_debit else "" }};
+{% endfor %}
