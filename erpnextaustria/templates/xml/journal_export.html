@@ -1,8 +1,8 @@
 Firma: {{ company }}
 FIBU: {{ fiscal_year.name }}
-Überschrift: Kontoblatt
+Überschrift: Journal
 Von Periode: {{ fiscal_year.year_start_date }}
-Bis Periode: {{ fiscal_year.year_start_date }}
+Bis Periode: {{ fiscal_year.year_end_date }}
 Journalnummer;Kto-Nr;GKto-Nr;Buchungssymbol;Beleg;Beleg-Dat.;Buchungstext;Buchung-Soll;Buchung-Haben;Sy;Proz;GW-Skonto/Steuer
 {% for d in data %}
 {{- (d.name or "") }};

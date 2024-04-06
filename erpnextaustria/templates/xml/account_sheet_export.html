@@ -2,7 +2,7 @@ Firma: {{ company }}
 FIBU: {{ fiscal_year.name }}
 Überschrift: Kontoblatt
 Von Periode: {{ fiscal_year.year_start_date }}
-Bis Periode: {{ fiscal_year.year_start_date }}
+Bis Periode: {{ fiscal_year.year_end_date }}
 Kto-Nr;GKto-Nr;Buchungssymbol;Beleg;Beleg-Dat.;Buchungstext;Buchung-Soll;Buchung-Haben;Sy;Proz;GW-Skonto/Steuer;Saldo
 {% for d in data %}
 {{- (d.account_number or "") }};

@@ -20,6 +20,9 @@ ROOT_TYPES = {
 def create_financial_export(fiscal_year, company):
     dbt_crt_file = create_debtors_creditors_file(fiscal_year, company)
     acts_file = create_accounts_file(fiscal_year, company)
+    acts_sheet_file = create_account_sheet_file(fiscal_year, company)
+    journal_file = create_journal_file(fiscal_year, company)
+    dbt_crt_balance_file = create_debtors_creditors_balance_file(fiscal_year, company)
     
     # create zip archie
     
@@ -241,7 +244,7 @@ def create_journal_file(fiscal_year, company):
             from_date=frappe.get_value("Fiscal Year", fiscal_year, "year_start_date"), 
             to_date=frappe.get_value("Fiscal Year", fiscal_year, "year_end_date")
         ), as_dict=True)
-    balances = {}
+
     for a in account_sheet:
         record = {
             'name': a.name,
@@ -280,11 +283,106 @@ def create_journal_file(fiscal_year, company):
     )
     
     # write file
-    filename = "/tmp/ACL_JOurnal_{0}_{1}.csv".format(company, fiscal_year)
+    filename = "/tmp/ACL_Journal_{0}_{1}.csv".format(company, fiscal_year)
     f = open(filename, "w", encoding="utf-8")              # cp1252 would be required, but cannot encode all required chars
     f.write(output_accounts)
     f.close()
     return filename
     
+def create_debtors_creditors_balance_file(fiscal_year, company):
+    data = []
+    # prepare debtors
+    debtors = frappe.get_all("Customer", fields=['name', 'customer_name', 'tax_id', 'payment_terms'])
+    for d in debtors:
+        record = {
+            'account': make_safe_string(d.name),
+            'name': make_safe_string(d.customer_name),
+            'uid': make_safe_string(d.tax_id),
+            'payment_terms': make_safe_string(d.payment_terms)
+        }
+        if d.payment_terms:
+            record.update({
+                'skonto_days_1': frappe.get_cached_value("Payment Terms Template", d.payment_terms, 'skonto_days'),
+                'skonto_percent_1': frappe.get_cached_value("Payment Terms Template", d.payment_terms, 'skonto_percent')
+            })
+        address = get_primary_customer_address(d.name)
+        if address:
+            record.update({
+                'street': make_safe_string(address.address_line1),
+                'pincode': make_safe_string(address.pincode),
+                'city': make_safe_string(address.city),
+                'country': make_safe_string(address.country)
+            })
+            
+        data.append(record)
+    
+    # prepare creditors
+    creditors = frappe.get_all("Supplier", fields=['name', 'supplier_name', 'tax_id', 'payment_terms'])
+    for c in creditors:
+        record = {
+            'account': make_safe_string(c.name),
+            'name': make_safe_string(c.supplier_name),
+            'uid': make_safe_string(c.tax_id),
+            'payment_terms': make_safe_string(c.payment_terms)
+        }
+        if c.payment_terms:
+            record.update({
+                'skonto_days_1': frappe.get_cached_value("Payment Terms Template", c.payment_terms, 'skonto_days'),
+                'skonto_percent_1': frappe.get_cached_value("Payment Terms Template", c.payment_terms, 'skonto_percent')
+            })
+        address = get_primary_supplier_address(c.name)
+        if address:
+            record.update({
+                'street': make_safe_string(address.address_line1),
+                'pincode': make_safe_string(address.pincode),
+                'city': make_safe_string(address.city),
+                'country': make_safe_string(address.country)
+            })
+            
+        data.append(record)
+        
+    # render template
+    output_debtors_creditors = frappe.render_template("erpnextaustria/templates/xml/debtors_creditors_export.html", 
+        {
+            'fiscal_year': frappe.get_doc("Fiscal Year", fiscal_year),
+            'company': company,
+            'data': data
+        }
+    )
+    
+    # write file
+    filename = "/tmp/ACL_Personensaldenliste_{0}_{1}.csv".format(company, fiscal_year)
+    f = open(filename, "w", encoding="utf-8")              # cp1252 would be required, but cannot encode all required chars
+    f.write(output_debtors_creditors)
+    f.close()
+    return filename
+
+def get_party_balances(party, company, fiscal_year):
+    party_balance = frappe.db.sql("""
+            SELECT
+                `name`,
+                `posting_date`,
+                `account`,
+                `against`,
+                `voucher_type`,
+                `voucher_no`,
+                `remarks`,
+                `debit`,
+                `credit`,
+                `creation`
+            FROM `tabGL Entry`
+            WHERE
+                `company` = "{company}"
+                AND `posting_date` BETWEEN "{from_date}" AND "{to_date}"
+            ORDER BY `name` ASC
+        """.format(
+            company=company, 
+            from_date=frappe.get_value("Fiscal Year", fiscal_year, "year_start_date"), 
+            to_date=frappe.get_value("Fiscal Year", fiscal_year, "year_end_date")
+        ), as_dict=True)
+    return {
+        'total_debit': 0,
+        'total_debit': 0
+    }
 def make_safe_string(s):
     return (s or "").replace(";", " ").replace("\n", " ").replace("\r", " ").replace("\"", "")
