@@ -7,7 +7,7 @@
 
 import frappe
 from erpnextswiss.scripts.crm_tools import get_primary_customer_address, get_primary_supplier_address
-import from zipfile import ZipFile
+from zipfile import ZipFile
 import os
 from frappe.utils.file_manager import save_file
 
