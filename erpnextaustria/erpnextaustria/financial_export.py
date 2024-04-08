@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2018-2022, libracore and contributors
+# Copyright (c) 2018-2024, libracore and contributors
 # For license information, please see license.txt
 #
 # This file contains the financial export logic for finance reviews
@@ -7,6 +7,9 @@
 
 import frappe
 from erpnextswiss.scripts.crm_tools import get_primary_customer_address, get_primary_supplier_address
+import zipfile
+import os
+from frappe.utils.file_manager import save_file
 
 ROOT_TYPES = {
     'Asset': "1",
@@ -17,22 +20,47 @@ ROOT_TYPES = {
 }
 
 @frappe.whitelist()
-def create_financial_export(fiscal_year, company):
-    dbt_crt_file = create_debtors_creditors_file(fiscal_year, company)
-    acts_file = create_accounts_file(fiscal_year, company)
-    acts_sheet_file = create_account_sheet_file(fiscal_year, company)
-    journal_file = create_journal_file(fiscal_year, company)
-    dbt_crt_balance_file = create_debtors_creditors_balance_file(fiscal_year, company)
-    act_balance_file = create_account_balance_file(fiscal_year, company)
+def create_financial_export(fiscal_year, company, debug=False):
+    dbt_crt_file = create_debtors_creditors_file(fiscal_year, company, debug)
+    acts_file = create_accounts_file(fiscal_year, company, debug)
+    acts_sheet_file = create_account_sheet_file(fiscal_year, company, debug)
+    journal_file = create_journal_file(fiscal_year, company, debug)
+    dbt_crt_balance_file = create_debtors_creditors_balance_file(fiscal_year, company, debug)
+    act_balance_file = create_account_balance_file(fiscal_year, company, debug)
     
     # create zip archie
-    
+    zip_filename = "/tmp/ACL_{0}_{1}.csv".format(company, fiscal_year)
+    with ZipFile(zip_filename, 'w') as z:
+        z.write(dbt_crt_file)
+        z.write(acts_file)
+        z.write(acts_sheet_file)
+        z.write(journal_file)
+        z.write(dbt_crt_balance_file)
+        z.write(act_balance_file)
+        
     # remove tmp files
+    if not debug:
+        os.remove(dbt_crt_file)
+        os.remove(acts_file)
+        os.remove(acts_sheet_file)
+        os.remove(journal_file)
+        os.remove(dbt_crt_balance_file)
+        os.remove(act_balance_file)
     
+    # attach zip to fiscal year
+    with open(zip_filename, mode='rb') as file:
+        zip_content = file.read()
+    
+    save_file(zip_filename.split("/")[-1], zip_content, "Fiscal Year",
+        fiscal_year, folder="Home", is_private=True)
+    
+    # remove zip
+    if not debug:
+        os.remove(zip_filename)
     return
     
     
-def create_debtors_creditors_file(fiscal_year, company):
+def create_debtors_creditors_file(fiscal_year, company, debug=False):
     data = []
     # prepare debtors
     debtors = frappe.get_all("Customer", fields=['name', 'customer_name', 'tax_id', 'payment_terms'])
@@ -58,6 +86,8 @@ def create_debtors_creditors_file(fiscal_year, company):
             })
             
         data.append(record)
+        if debug:
+            print("create_debtors_creditors_file: {0}".format(d.name))
     
     # prepare creditors
     creditors = frappe.get_all("Supplier", fields=['name', 'supplier_name', 'tax_id', 'payment_terms'])
@@ -83,6 +113,8 @@ def create_debtors_creditors_file(fiscal_year, company):
             })
             
         data.append(record)
+        if debug:
+            print("create_debtors_creditors_file: {0}".format(c.name))
         
     # render template
     output_debtors_creditors = frappe.render_template("erpnextaustria/templates/xml/debtors_creditors_export.html", 
@@ -100,7 +132,7 @@ def create_debtors_creditors_file(fiscal_year, company):
     f.close()
     return filename
 
-def create_accounts_file(fiscal_year, company):
+def create_accounts_file(fiscal_year, company, debug=False):
     data = []
     # prepare debtors
     accounts = frappe.get_all("Account", 
@@ -117,6 +149,8 @@ def create_accounts_file(fiscal_year, company):
             }
                 
             data.append(record)
+            if debug:
+                print("create_accounts_file: {0}".format(a.name))
         
     # render template
     output_accounts = frappe.render_template("erpnextaustria/templates/xml/accounts_export.html", 
@@ -134,7 +168,7 @@ def create_accounts_file(fiscal_year, company):
     f.close()
     return filename
 
-def create_account_sheet_file(fiscal_year, company):
+def create_account_sheet_file(fiscal_year, company, debug=False):
     data = []
     # prepare debtors
     account_sheet = frappe.db.sql("""
@@ -203,7 +237,9 @@ def create_account_sheet_file(fiscal_year, company):
         record.update({'balance': balances[a.account]})
         
         data.append(record)
-        
+        if debug:
+            print("create_account_sheet_file: {0}".format(a.name))
+
     # render template
     output_accounts = frappe.render_template("erpnextaustria/templates/xml/account_sheet_export.html", 
         {
@@ -220,7 +256,7 @@ def create_account_sheet_file(fiscal_year, company):
     f.close()
     return filename
 
-def create_journal_file(fiscal_year, company):
+def create_journal_file(fiscal_year, company, debug=False):
     data = []
     # prepare debtors
     account_sheet = frappe.db.sql("""
@@ -273,6 +309,8 @@ def create_journal_file(fiscal_year, company):
             })
         
         data.append(record)
+        if debug:
+            print("create_journal_file: {0}".format(a.name))
         
     # render template
     output_accounts = frappe.render_template("erpnextaustria/templates/xml/journal_export.html", 
@@ -290,7 +328,7 @@ def create_journal_file(fiscal_year, company):
     f.close()
     return filename
     
-def create_debtors_creditors_balance_file(fiscal_year, company):
+def create_debtors_creditors_balance_file(fiscal_year, company, debug=False):
     data = []
     # prepare debtors
     debtors = frappe.get_all("Customer", fields=['name', 'customer_name', 'tax_id', 'payment_terms'])
@@ -309,6 +347,8 @@ def create_debtors_creditors_balance_file(fiscal_year, company):
         }
             
         data.append(record)
+        if debug:
+            print("create_debtors_creditors_balance_file: {0}".format(d.name))
     
     # prepare creditors
     creditors = frappe.get_all("Supplier", fields=['name', 'supplier_name', 'tax_id', 'payment_terms'])
@@ -320,13 +360,15 @@ def create_debtors_creditors_balance_file(fiscal_year, company):
             'account': make_safe_string(c.name),
             'name': make_safe_string(c.customer_name),
             'opening_balance': opening_balance,
-            'total_debit': balance['opening_debit'],
-            'total_crdit': (-1) * balance['opening_credit'],
+            'total_debit': balance['total_debit'],
+            'total_credit': (-1) * balance['total_credit'],
             'balance_debit': opening_balance + period_change if period_change >= 0 else None,
             'balance_credit': opening_balance + period_change if period_change < 0 else None,
         }
             
         data.append(record)
+        if debug:
+            print("create_debtors_creditors_balance_file: {0}".format(c.name))
         
     # render template
     output_debtors_creditors = frappe.render_template("erpnextaustria/templates/xml/debtors_creditors_balance_export.html", 
@@ -345,7 +387,7 @@ def create_debtors_creditors_balance_file(fiscal_year, company):
     return filename
 
 
-def create_account_balance_file(fiscal_year, company):
+def create_account_balance_file(fiscal_year, company, debug=False):
     data = []
     # prepare debtors
     accounts = frappe.get_all("Account", 
@@ -354,22 +396,24 @@ def create_account_balance_file(fiscal_year, company):
         order_by='account_number')
     for a in accounts:
         if a.account_number:                            # only export with account numbers (leave structural elements)
-            balance = get_party_balances(a.name, company, fiscal_year)
+            balance = get_account_balances(a.name, company, fiscal_year)
             opening_balance = balance['opening_debit'] - balance['opening_credit']
             period_change = balance['total_debit'] - balance['total_credit']
             record = {
                 'account': make_safe_string(a.account_number),
                 'name': make_safe_string(a.account_name),
                 'opening_balance': opening_balance,
-                'total_debit': balance['opening_debit'],
-                'total_crdit': (-1) * balance['opening_credit'],
+                'total_debit': balance['total_debit'],
+                'total_credit': (-1) * balance['total_credit'],
                 'balance_debit': opening_balance + period_change if period_change >= 0 else None,
                 'balance_credit': opening_balance + period_change if period_change < 0 else None,
             }
             data.append(record)
+            if debug:
+                print("create_account_balance_file: {0}".format(a.name))
         
     # render template
-    output_debtors_creditors = frappe.render_template("erpnextaustria/templates/xml/account_balance_export.html", 
+    output_accounts_balance = frappe.render_template("erpnextaustria/templates/xml/account_balance_export.html", 
         {
             'fiscal_year': frappe.get_doc("Fiscal Year", fiscal_year),
             'company': company,
@@ -380,7 +424,7 @@ def create_account_balance_file(fiscal_year, company):
     # write file
     filename = "/tmp/ACL_Saldenliste_{0}_{1}.csv".format(company, fiscal_year)
     f = open(filename, "w", encoding="utf-8")              # cp1252 would be required, but cannot encode all required chars
-    f.write(output_debtors_creditors)
+    f.write(output_accounts_balance)
     f.close()
     return filename
     
@@ -429,7 +473,7 @@ def get_party_balances(party, company, fiscal_year):
     }
 
 def get_account_balances(account, company, fiscal_year):
-    opening_party_balance = frappe.db.sql("""
+    opening_account_balance = frappe.db.sql("""
             SELECT
                 `account`,
                 IFNULL(SUM(`debit`), 0) AS `total_debit`,
@@ -446,7 +490,7 @@ def get_account_balances(account, company, fiscal_year):
             account=account
         ), as_dict=True)
         
-    party_balance = frappe.db.sql("""
+    account_balance = frappe.db.sql("""
             SELECT
                 `account`,
                 `against`,
@@ -465,10 +509,10 @@ def get_account_balances(account, company, fiscal_year):
         ), as_dict=True)
         
     return {
-        'opening_debit': opening_party_balance[0]['total_debit'],
-        'opening_credit': opening_party_balance[0]['total_credit'],
-        'total_debit': party_balance[0]['total_debit'],
-        'total_credit': party_balance[0]['total_credit'],
+        'opening_debit': opening_account_balance[0]['total_debit'],
+        'opening_credit': opening_account_balance[0]['total_credit'],
+        'total_debit': account_balance[0]['total_debit'],
+        'total_credit': account_balance[0]['total_credit'],
     }
 
 def make_safe_string(s):

@@ -12,6 +12,6 @@ Kto-Nr;Kontobezeichnung;EB;Ges.-Soll;Ges.-Haben;Monat-Soll;Monat-Haben;Saldo Sol
 {{- ("{:.2f}".format(d.total_credit or 0)).replace(".", ",") }};
 {{- ("{:.2f}".format(d.month_debit)).replace(".", ",") if d.month_debit else "" }};
 {{- ("{:.2f}".format(d.month_credit)).replace(".", ",") if d.month_debit else "" }};
-{{- ("{:.2f}".format(d.balance_debit)).replace(".", ",") if d.month_debit else "" }};
-{{- ("{:.2f}".format(d.balance_credit)).replace(".", ",") if d.month_debit else "" }};
+{{- ("{:.2f}".format(d.balance_debit)).replace(".", ",") if d.balance_debit else "" }};
+{{- ("{:.2f}".format(d.balance_credit)).replace(".", ",") if d.balance_credit else "" }};
 {% endfor %}
