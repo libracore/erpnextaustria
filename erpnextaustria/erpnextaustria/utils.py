@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2018-2023, Fink Zeitsysteme/libracore and contributors
+# Copyright (c) 2018-2024, Fink Zeitsysteme/libracore and contributors
 # For license information, please see license.txt
 #
 # Import exchange rates
@@ -14,6 +14,7 @@ import requests
 from bs4 import BeautifulSoup
 from time import strftime
 from frappe.utils import rounded
+import html                     # to escape html/xml characters
 
 # UID validation
 #
@@ -90,9 +91,9 @@ def create_ebinterface_xml(sinv, with_details=1):
             'sales_invoice': {
                 'name': sales_invoice.name,
                 'posting_date': sales_invoice.posting_date,
-                'company': sales_invoice.company,
+                'company': html.escape(sales_invoice.company or ""),
                 'owner': sales_invoice.owner,
-                'customer_name': sales_invoice.customer_name,
+                'customer_name': html.escape(sales_invoice.customer_name or ""),
                 'net_total': sales_invoice.net_total,
                 'grand_total': sales_invoice.grand_total,
                 'due_date': sales_invoice.due_date
@@ -101,8 +102,8 @@ def create_ebinterface_xml(sinv, with_details=1):
                 'delivery_date': delivery_date
             },
             'company': {
-                'address_line1': company_address.address_line1,
-                'city': company_address.city,
+                'address_line1': html.escape(company_address.address_line1 or ""),
+                'city': html.escape(company_address.city or ""),
                 'pincode': company_address.pincode,
                 'country_code': company_country.code,
                 'country_name': company_country.name,
@@ -110,7 +111,7 @@ def create_ebinterface_xml(sinv, with_details=1):
                 'firmensitz': company.firmensitz,
                 'firmenbuchnummer': company.firmenbuchnummer,
                 'firmenbuchgericht': company.firmenbuchgericht,
-                'name': company.name
+                'name': html.escape(company.name or "")
             },
             'owner': {
                 'full_name': owner.full_name
@@ -118,9 +119,9 @@ def create_ebinterface_xml(sinv, with_details=1):
             'customer': {
                 'lieferantennummer': customer.lieferantennummer,
                 'tax_id': customer.tax_id,
-                'auftragsreferenz': customer.auftragsreferenz,
-                'address_line1': customer_address.address_line1,
-                'city': customer_address.city,
+                'auftragsreferenz': html.escape(customer.auftragsreferenz or ""),
+                'address_line1': html.escape(customer_address.address_line1 or ""),
+                'city': html.escape(customer_address.city or ""),
                 'pincode': customer_address.pincode,
                 'country_code': customer_country.code,
                 'country_name': customer_country.name
@@ -128,8 +129,8 @@ def create_ebinterface_xml(sinv, with_details=1):
             'sales_order': sales_order,
             'contact': {
                 'salutation': contact.salutation,
-                'first_name': contact.first_name,
-                'last_name': contact.last_name,
+                'first_name': html.escape(contact.first_name or ""),
+                'last_name': html.escape(contact.last_name or ""),
                 'phone': contact.phone,
                 'email_id': contact.email_id
             },
@@ -144,7 +145,7 @@ def create_ebinterface_xml(sinv, with_details=1):
         # add items
         for index, item in enumerate(sales_invoice.items, start=1):
             i = {
-                'item_name': item.item_name,
+                'item_name': html.escape(item.item_name or ""),
                 'uom': item.uom, 
                 'qty': item.qty,
                 'rate': item.rate,
