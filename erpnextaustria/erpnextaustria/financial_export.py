@@ -340,8 +340,8 @@ def create_debtors_creditors_balance_file(fiscal_year, company, debug=False):
             'account': make_safe_string(d.name),
             'name': make_safe_string(d.customer_name),
             'opening_balance': opening_balance,
-            'total_debit': balance['opening_debit'],
-            'total_crdit': (-1) * balance['opening_credit'],
+            'total_debit': balance['total_debit'],
+            'total_crdit': (-1) * balance['total_credit'],
             'balance_debit': opening_balance + period_change if period_change >= 0 else None,
             'balance_credit': opening_balance + period_change if period_change < 0 else None,
         }
