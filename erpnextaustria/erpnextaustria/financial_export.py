@@ -11,6 +11,7 @@ from zipfile import ZipFile
 import os
 from frappe.utils.file_manager import save_file
 from frappe.utils.background_jobs import enqueue
+from frappe import _
 
 ROOT_TYPES = {
     'Asset': "1",
