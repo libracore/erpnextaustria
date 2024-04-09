@@ -10,6 +10,7 @@ from erpnextswiss.scripts.crm_tools import get_primary_customer_address, get_pri
 from zipfile import ZipFile
 import os
 from frappe.utils.file_manager import save_file
+from frappe.utils.background_jobs import enqueue
 
 ROOT_TYPES = {
     'Asset': "1",
@@ -20,6 +21,20 @@ ROOT_TYPES = {
 }
 
 @frappe.whitelist()
+def async_create_financial_export(fiscal_year, company, debug=False):
+    kwargs={
+          'fiscal_year': fiscal_year,
+          'company': company,
+          'debug': debug
+        }
+    
+    enqueue("erpnextaustria.erpnextaustria.financial_export.create_financial_export",
+        queue='long',
+        timeout=90000,
+        **kwargs)
+    return {'result': _('Creating export file...')}
+
+
 def create_financial_export(fiscal_year, company, debug=False):
     dbt_crt_file = create_debtors_creditors_file(fiscal_year, company, debug)
     acts_file = create_accounts_file(fiscal_year, company, debug)
