@@ -29,8 +29,8 @@ def create_financial_export(fiscal_year, company, debug=False):
     act_balance_file = create_account_balance_file(fiscal_year, company, debug)
     
     # create zip archie
-    zip_filename = "/tmp/ACL_{0}_{1}.csv".format(company, fiscal_year)
-    with ZipFile(zip_filename, 'w') as z:
+    zip_filename = "/tmp/ACL_{0}_{1}.zip".format(company, fiscal_year)
+    with ZipFile(zip_filename, 'w', compression=ZIP_DEFLATED) as z:
         z.write(dbt_crt_file)
         z.write(acts_file)
         z.write(acts_sheet_file)
