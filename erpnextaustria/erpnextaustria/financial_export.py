@@ -272,8 +272,33 @@ def create_account_sheet_file(fiscal_year, company, debug=False):
     f.close()
     return filename
 
-def create_journal_file(fiscal_year, company, debug=False):
+def create_journal_file(fiscal_year, company, debug=False, add_opening=True):
     data = []
+
+    # for balance accounts, introduce virtual opening if add_opening
+    if add_opening:
+        # find balance sheet accounts
+        balance_sheet_accounts = frappe.get_all("Account", 
+            filters={'company': company, 'report_type': 'Balance Sheet'},
+            fields=['name', 'account_name', 'account_number', 'root_type', 'account_type'],
+            order_by='account_number')
+        fiscal_year_start = frappe.get_value("Fiscal Year", fiscal_year, "year_start_date")
+        for b in balance_sheet_accounts:
+            account_balance = get_account_balances(b['account_name'], company, fiscal_year)
+            opening_balance = account_balance.opening_debit - account_balance.opening_credit
+            if (opening_balance) != 0:
+                data.append({
+                    'name': "EB",
+                    'posting_date': fiscal_year_start,
+                    'account_number': b['account_number'],
+                    'against_number': "",
+                    'voucher_type': "EB",
+                    'voucher_no': "",
+                    'remarks': "",
+                    'debit': opening_balance if opening_balance > 0 else None,
+                    'credit': opening_balance if opening_balance < 0 else None
+                })
+
     # prepare debtors
     account_sheet = frappe.db.sql("""
             SELECT
