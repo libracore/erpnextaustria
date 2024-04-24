@@ -415,14 +415,15 @@ def create_account_balance_file(fiscal_year, company, debug=False):
             balance = get_account_balances(a.name, company, fiscal_year)
             opening_balance = balance['opening_debit'] - balance['opening_credit']
             period_change = balance['total_debit'] - balance['total_credit']
+            ending_balance = opening_balance + period_change
             record = {
                 'account': make_safe_string(a.account_number),
                 'name': make_safe_string(a.account_name),
                 'opening_balance': opening_balance,
                 'total_debit': balance['total_debit'],
                 'total_credit': (-1) * balance['total_credit'],
-                'balance_debit': opening_balance + period_change if period_change >= 0 else None,
-                'balance_credit': opening_balance + period_change if period_change < 0 else None,
+                'balance_debit': ending_balance if ending_balance >= 0 else None,
+                'balance_credit': ending_balance if ending_balance < 0 else None,
             }
             data.append(record)
             if debug:
@@ -516,7 +517,8 @@ def get_account_balances(account, company, fiscal_year):
             WHERE
                 `company` = "{company}"
                 AND `posting_date` BETWEEN "{from_date}" AND "{to_date}"
-                AND `account` = "{account}";
+                AND `account` = "{account}"
+                AND `voucher_type` != "Period Closing Voucher";
         """.format(
             company=company, 
             from_date=frappe.get_value("Fiscal Year", fiscal_year, "year_start_date"), 
