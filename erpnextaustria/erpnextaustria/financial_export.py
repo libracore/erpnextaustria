@@ -285,7 +285,7 @@ def create_journal_file(fiscal_year, company, debug=False, add_opening=True):
         fiscal_year_start = frappe.get_value("Fiscal Year", fiscal_year, "year_start_date")
         for b in balance_sheet_accounts:
             account_balance = get_account_balances(b['account_name'], company, fiscal_year)
-            opening_balance = account_balance['opening_debit'] - account_balance.['opening_credit']
+            opening_balance = account_balance['opening_debit'] - account_balance['opening_credit']
             if (opening_balance) != 0:
                 data.append({
                     'name': "EB",
