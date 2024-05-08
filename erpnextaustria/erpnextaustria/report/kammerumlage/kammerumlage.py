@@ -126,5 +126,5 @@ def generate_transfer_file(filters):
         'amount': round(data[-1]['total'], 2)
     }
     # render into html
-    content = frappe.render_template('erpnextaustria/erpnextaustria/report/kammerumlage/kammerumlage.html', doc)
+    content = frappe.render_template('erpnextaustria/erpnextaustria/report/kammerumlage/kammerumlage_xml.html', doc)
     return {'content': content}
