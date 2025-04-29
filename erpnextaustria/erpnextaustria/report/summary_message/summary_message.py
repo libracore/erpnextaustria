@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2017-2018, libracore and contributors
+# Copyright (c) 2017-2025, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -49,7 +49,7 @@ def get_data(month, year):
           /*`tabSales Invoice Item`.`base_net_amount`,*/
           /*`tabSales Invoice`.`name`, */
           /*`tabSales Invoice Item`.`item_code`,*/
-          IF(`tabItem`.`is_stock_item` = 1, "", "1") AS `code`
+          IF(`tabItem`.`is_stock_item` = 1, "", "J") AS `code`
           /* CONCAT(`tabCustomer`.`tax_id`, ":", `tabItem`.`is_stock_item`) AS `position` */
         FROM `tabSales Invoice Item`
         LEFT JOIN `tabSales Invoice` ON `tabSales Invoice Item`.`parent` = `tabSales Invoice`.`name`
