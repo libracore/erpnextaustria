@@ -34,9 +34,9 @@ doctype_js = {
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
 # adding Jinja environments
-jenv = {
+jinja = {
     "methods": [
-        "get_at_tax_details:erpnextaustria.erpnextaustria.report.kontrolle_mwst_at.kontrolle_mwst_at.get_data"
+        "erpnextaustria.erpnextaustria.report.kontrolle_mwst_at.kontrolle_mwst_at.get_data"
     ]
 }
 

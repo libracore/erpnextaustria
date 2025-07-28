@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021, libracore and contributors
+# Copyright (c) 2016-2025, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -50,3 +50,10 @@ def get_data(from_date, end_date, code, company="%"):
                     start_date=from_date, end_date=end_date, code=code)     
     data = frappe.db.sql(sql_query, as_dict = True)
     return data
+
+"""
+Jinja endpoint
+"""
+def get_at_tax_details(from_date, end_date, code, company="%"):
+    return get_data(from_date, end_date, code, company)
+    
