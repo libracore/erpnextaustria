@@ -226,8 +226,7 @@ def get_tax_rate(taxes_and_charges_template):
     else:
         return 0
 
-@frappe.whitelist()
-def download_uva_pdf(uva):
+def create_uva_pdf(uva):
     doc = frappe.get_doc("AT VAT Declaration", uva)
     # generate content
     company_address = get_company_address(doc.company)
@@ -314,6 +313,11 @@ def download_uva_pdf(uva):
     }
     # generate pdf
     generated_pdf = pypdftk.fill_form(get_bench_path() + '/apps/erpnextaustria/erpnextaustria/templates/pdf/U30.pdf', data)
+    return generated_pdf
+
+@frappe.whitelist()
+def download_uva_pdf(uva):
+    generated_pdf = create_uva_pdf(uva)
     with open(generated_pdf, mode='rb') as file:
         pdf_data = file.read()
     # return content
