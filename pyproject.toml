@@ -22,3 +22,8 @@ build-backend = "flit_core.buildapi"
 Homepage = "https://git.libracore.io/libracore/erpnextaustria"
 Repository = "https://git.libracore.io/libracore/erpnextaustria.git"
 "Bug Reports" = "https://git.libracore.io/libracore/erpnextaustria/issues"
+
+[deploy.dependencies.apt]
+packages = [
+    "pdftk"
+]
