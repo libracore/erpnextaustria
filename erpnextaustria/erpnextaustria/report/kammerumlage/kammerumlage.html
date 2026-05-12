@@ -1,0 +1,51 @@
+<style>
+    .print-format {
+        padding: 4mm;
+        font-size: 8.0pt !important;
+    }
+    .print-format td {
+        vertical-align:middle !important;
+    }
+    </style>
+
+    <h2 class="text-center" style="margin-top:0">{%= __(report.report_name) %}</h2>
+    <h6 class="text-center">
+            {% if (filters.company ) { %}
+            {%= __("Company") %}: {%= filters.company %}
+            {% } %}
+    </h6>
+    <h6 class="text-center">
+            {% if (filters.year ) { %}
+            {%= __("Year") %}: {%= filters.year %}
+            {% } %}
+    </h6>
+    <h6 class="text-center">
+            {% if (filters.quarter ) { %}
+            {%= __("Quarter") %}: {%= filters.quarter %}
+            {% } %}
+    </h6>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width: 40%">{%= __(columns[0].label) %}</th>
+                <th style="width: 15%">{%= __(columns[1].label) %}</th>
+                <th style="width: 15%">{%= __(columns[2].label) %}</th>
+                <th style="width: 15%">{%= __(columns[3].label) %}</th>
+                <th style="width: 15%">{%= __(columns[4].label) %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- hack: data will always contain an invaliud total row even tought disabled - remove -->
+            {% for(var i=0, l=(data.length - 1); i<l; i++) { %}
+                <tr>
+                    <td>{%= data[i].account %}</td>
+                    <td style="text-align: right">{%= format_currency(data[i].m0, data[i].currency) %}</td>
+                    <td style="text-align: right">{%= format_currency(data[i].m1, data[i].currency) %}</td>
+                    <td style="text-align: right">{%= format_currency(data[i].m2, data[i].currency) %}</td>
+                    <td style="text-align: right">{%= format_currency(data[i].total, data[i].currency) %}</td>
+                </tr>
+            {% } %}
+        </tbody>
+    </table>
+    <p class="text-right text-muted">{{ __("Printed On ") }}{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
