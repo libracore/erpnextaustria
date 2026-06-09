@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2017-2023, libracore and contributors
+# Copyright (c) 2017-2026, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -134,7 +134,7 @@ def generate_transfer_file(month, year, mode, aggregate=0):
         if data[i]['kn8'] and (data[i]['value'] or 0) > 0 and (data[i]['bess_mass'] or 0) > 0:
             content += make_line("{kn8};{item_name};{supl_cntry};{source_cntry};{type};{uom};{spec_uom};{amount};{value};{uid}".format(
                 type="11",
-                kn8=(data[i]['kn8'] or '').replace(' ', ''),
+                kn8=(data[i]['kn8'] or '').replace(' ', '')[:8],
                 item_name=data[i]['item_name'],
                 supl_cntry=data[i]['vers_land'],
                 source_cntry=data[i]['ursp_land'],
