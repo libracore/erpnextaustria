@@ -1,4 +1,4 @@
-# Copyright (c) 2021, libracore and contributors
+# Copyright (c) 2021-2026, libracore and contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -11,7 +11,7 @@ def execute(filters=None):
         "party_type": "Customer",
         "naming_by": ["Selling Settings", "cust_master_name"],
     }
-    columns, data, more, chart = ReceivablePayableReport(filters).run(args)
+    columns, data, unused, chart, unused2, skip_total_row = ReceivablePayableReport(filters).run(args)
     columns = get_columns()
     # aggregate by customer
     output = []

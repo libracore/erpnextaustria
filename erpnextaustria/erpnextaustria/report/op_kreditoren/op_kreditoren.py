@@ -1,4 +1,4 @@
-# Copyright (c) 2021, libracore and Contributors
+# Copyright (c) 2021-2026, libracore and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -10,7 +10,7 @@ def execute(filters=None):
         "party_type": "Supplier",
         "naming_by": ["Buying Settings", "supp_master_name"],
     }
-    columns, data, more, chart = ReceivablePayableReport(filters).run(args)
+    columns, data, unused, chart, unused2, skip_total_row = ReceivablePayableReport(filters).run(args)
     columns = get_columns()
     # aggregate by supplier
     output = []
