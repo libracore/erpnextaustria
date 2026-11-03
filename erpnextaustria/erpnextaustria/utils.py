@@ -40,15 +40,15 @@ def vat_request(uid, requester_uid=None, timeout=15):
     # Optional: your own VAT ID, so VIES returns an official consultation number
     if requester_uid:
         payload["requesterMemberStateCode"] = requester_uid[0:2].upper()
-        payload["requesterNumber"] = requester_uid.replace(" ", "").upper()
+        payload["requesterNumber"] = requester_uid[2:].replace(" ", "").upper()
 
     payload = {
         "countryCode": country_code,
-        "vatNumber": uid.replace(" ", "").upper(),
+        "vatNumber": uid[2:].replace(" ", "").upper(),
     }
 
     response = requests.post(
-        f"{BASE_URL}/check-vat-number",
+        f"{VIES_BASE_URL}/check-vat-number",
         json=payload,
         headers={"Accept": "application/json"},
         timeout=timeout,
