@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2018-2024, Fink Zeitsysteme/libracore and contributors
+# Copyright (c) 2018-2026, Fink Zeitsysteme/libracore and contributors
 # For license information, please see license.txt
 #
 # Import exchange rates
@@ -9,12 +9,13 @@
 # imports
 import frappe
 from frappe import _
-from zeep import Client
 import requests
 from bs4 import BeautifulSoup
 from time import strftime
 from frappe.utils import rounded
 import html                     # to escape html/xml characters
+
+VIES_BASE_URL = "https://ec.europa.eu/taxation_customs/vies/rest-api"
 
 # UID validation
 #
@@ -31,10 +32,30 @@ def check_uid(uid):
             frappe.throw( _("Unable to validate UID. Please try again in a few seconds.") )
     return result.valid
 
-def vat_request(uid):
-    client = Client('http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl')
-    result = client.service.checkVat(uid[0:2], uid[2:])
-    return result
+def vat_request(uid, requester_uid=None, timeout=15):
+    country_code = uid[0:2].upper()
+    if country_code == "GR":  # VIES uses EL for Greece
+        country_code = "EL"
+    
+    # Optional: your own VAT ID, so VIES returns an official consultation number
+    if requester_uid:
+        payload["requesterMemberStateCode"] = requester_uid[0:2].upper()
+        payload["requesterNumber"] = requester_uid.replace(" ", "").upper()
+
+    payload = {
+        "countryCode": country_code,
+        "vatNumber": uid.replace(" ", "").upper(),
+    }
+
+    response = requests.post(
+        f"{BASE_URL}/check-vat-number",
+        json=payload,
+        headers={"Accept": "application/json"},
+        timeout=timeout,
+    )
+
+    response.raise_for_status()
+    return response.json()
 
 # Creation of ebInterface invoice file (following ebInterface 5.0)
 #
