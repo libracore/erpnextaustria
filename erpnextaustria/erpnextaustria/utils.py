@@ -30,7 +30,7 @@ def check_uid(uid):
             result = vat_request(uid)
         except Exception as e:
             frappe.throw( _("Unable to validate UID. Please try again in a few seconds.") )
-    return result.valid
+    return result.get('valid')
 
 def vat_request(uid, requester_uid=None, timeout=15):
     country_code = uid[0:2].upper()
