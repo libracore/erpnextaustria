@@ -48,7 +48,7 @@ def vat_request(uid, requester_uid=None, timeout=15):
     }
 
     response = requests.post(
-        f"{VIES_BASE_URL}/check-vat-number",
+        "{VIES_BASE_URL}/check-vat-number".format(VIES_BASE_URL=VIES_BASE_URL),
         json=payload,
         headers={"Accept": "application/json"},
         timeout=timeout,
