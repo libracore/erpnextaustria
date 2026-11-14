@@ -39,3 +39,18 @@ intra-community acquisitions, Q3 2026 with KZ124/KZ125, monthly/quarterly bounda
 date objects, missing/zero/rounded-zero amounts, escaped company names and invalid
 periods. Mutation checks prove that the XSDs reject the original zero/order errors
 and a misplaced KZ057. XSD validity does not replace the BMF business checks.
+
+All populated KZ amounts are compared against explicit expected dictionaries,
+including every existing supported field under both current schemas. Removing
+KZ012 from the mapping now fails the field comparisons for both schema versions.
+Nonzero KZ020 (`tax_free_revenue`, after rounding) is rejected with a VST explanation
+before XML rendering: the required exemption-reason field is not supported by
+this DocType. Missing and rounded-zero KZ020 values remain omitted.
+
+Periods wholly before January 2022 retain the original export structure, field
+set, numeric formatting and optional zero elements, without a newer schema URL
+or the newer calendar-period restrictions. These historical exports are compared
+to `fixtures/u30_legacy.xml`, frozen from upstream commit `68d66a1` with synthetic
+values and a fixed timestamp. They are deliberately not validated against the
+2022/2026 XSDs. XML escaping also applies to historical company names/identifiers.
+Nonzero KZ124/KZ125 remain rejected before July 2026, including historical periods.

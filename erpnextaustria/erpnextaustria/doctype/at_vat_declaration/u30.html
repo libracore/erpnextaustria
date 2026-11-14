@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+{% if schema_url %}<?xml version="1.0" encoding="UTF-8"?>
 <ERKLAERUNGS_UEBERMITTLUNG xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="{{ schema_url | e }}">
  <INFO_DATEN>
   <ART_IDENTIFIKATIONSBEGRIFF>FASTNR</ART_IDENTIFIKATIONSBEGRIFF>
@@ -37,3 +37,4 @@
    {% endfor %}</VORSTEUER>{% endif %}
  </ERKLAERUNG>
 </ERKLAERUNGS_UEBERMITTLUNG>
+{% else %}{% include 'erpnextaustria/erpnextaustria/doctype/at_vat_declaration/u30_legacy.html' %}{% endif %}
