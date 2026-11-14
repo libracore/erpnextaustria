@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ERKLAERUNGS_UEBERMITTLUNG>
+{% if schema_url %}<?xml version="1.0" encoding="UTF-8"?>
+<ERKLAERUNGS_UEBERMITTLUNG xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="{{ schema_url | e }}">
  <INFO_DATEN>
   <ART_IDENTIFIKATIONSBEGRIFF>FASTNR</ART_IDENTIFIKATIONSBEGRIFF>
-  <IDENTIFIKATIONSBEGRIFF>{{ fastnr }}</IDENTIFIKATIONSBEGRIFF>
+  <IDENTIFIKATIONSBEGRIFF>{{ fastnr | e }}</IDENTIFIKATIONSBEGRIFF>
   <PAKET_NR>1</PAKET_NR>
   <DATUM_ERSTELLUNG type="datum">{{ datum }}</DATUM_ERSTELLUNG>
   <UHRZEIT_ERSTELLUNG type="uhrzeit">{{ zeit }}</UHRZEIT_ERSTELLUNG>
@@ -14,34 +14,27 @@
    <ANBRINGEN>U30</ANBRINGEN>
    <ZRVON type="jahrmonat">{{ von }}</ZRVON>
    <ZRBIS type="jahrmonat">{{ bis }}</ZRBIS>
-   <FASTNR>{{ fastnr }}</FASTNR>
-   <KUNDENINFO>{{ kundeninfo }}</KUNDENINFO>
+   <FASTNR>{{ fastnr | e }}</FASTNR>
+   <KUNDENINFO>{{ kundeninfo | e }}</KUNDENINFO>
   </ALLGEMEINE_DATEN>
   <LIEFERUNGEN_LEISTUNGEN_EIGENVERBRAUCH>
-   <KZ000 type="kz">{{ "{:.2f}".format(revenue) }}</KZ000>
-   <STEUERFREI>
-    <KZ011 type="kz">{{ "{:.2f}".format(exports) }}</KZ011>
-    <KZ017 type="kz">{{ "{:.2f}".format(inner_eu) }}</KZ017>
-   </STEUERFREI>
-   <KZ021 type="kz">{{ "{:.2f}".format(receiver_vat) }}</KZ021>
-   <VERSTEUERT>
-    <KZ022 type="kz">{{ "{:.2f}".format(amount_normal) }}</KZ022>
-    <KZ029 type="kz">{{ "{:.2f}".format(reduced_amount) }}</KZ029>
-    <KZ057 type="kz">{{ "{:.2f}".format(tax_057) }}</KZ057>
-   </VERSTEUERT>
+   {% for code, value in revenue_fields %}<{{ code }} type="kz">{{ value }}</{{ code }}>
+   {% endfor %}{% if tax_free_fields %}<STEUERFREI>
+    {% for code, value in tax_free_fields %}<{{ code }} type="kz">{{ value }}</{{ code }}>
+    {% endfor %}</STEUERFREI>{% endif %}
+   {% if taxed_fields %}<VERSTEUERT>
+    {% for code, value in taxed_fields %}<{{ code }} type="kz">{{ value }}</{{ code }}>
+    {% endfor %}</VERSTEUERT>{% endif %}
   </LIEFERUNGEN_LEISTUNGEN_EIGENVERBRAUCH>
-  <VORSTEUER>
-   <KZ060 type="kz">{{ "{:.2f}".format(total_pretax) }}</KZ060>
-   <KZ061 type="kz">{{ "{:.2f}".format(import_pretax) }}</KZ061>
-   <KZ083 type="kz">{{ "{:.2f}".format(import_charge_pretax) }}</KZ083>
-   <KZ065 type="kz">{{ "{:.2f}".format(intercommunla_pretax) }}</KZ065>
-   <KZ066 type="kz">{{ "{:.2f}".format(taxation_pretax) }}</KZ066>
-  </VORSTEUER>
-  <INNERGEMEINSCHAFTLICHE_ERWERBE>
-   <KZ070 type="kz">{{ "{:.2f}".format(intercommunal_revenue) }}</KZ070>
-   <VERSTEUERT_IGE>
-    <KZ072 type="kz">{{ "{:.2f}".format(amount_inter_normal) }}</KZ072>
-   </VERSTEUERT_IGE>
-  </INNERGEMEINSCHAFTLICHE_ERWERBE>
+  {% if acquisition_fields or taxed_acquisition_fields %}<INNERGEMEINSCHAFTLICHE_ERWERBE>
+   {% for code, value in acquisition_fields %}<{{ code }} type="kz">{{ value }}</{{ code }}>
+   {% endfor %}{% if taxed_acquisition_fields %}<VERSTEUERT_IGE>
+    {% for code, value in taxed_acquisition_fields %}<{{ code }} type="kz">{{ value }}</{{ code }}>
+    {% endfor %}</VERSTEUERT_IGE>{% endif %}
+  </INNERGEMEINSCHAFTLICHE_ERWERBE>{% endif %}
+  {% if input_tax_fields %}<VORSTEUER>
+   {% for code, value in input_tax_fields %}<{{ code }} type="kz">{{ value }}</{{ code }}>
+   {% endfor %}</VORSTEUER>{% endif %}
  </ERKLAERUNG>
 </ERKLAERUNGS_UEBERMITTLUNG>
+{% else %}{% include 'erpnextaustria/erpnextaustria/doctype/at_vat_declaration/u30_legacy.html' %}{% endif %}
