@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from datetime import datetime
 import pypdftk
 from frappe.utils import get_bench_path
+from erpnextaustria.erpnextaustria.doctype.at_vat_declaration.u30 import get_transfer_data
 
 class ATVATDeclaration(Document):
     def on_submit(self):
@@ -124,42 +125,17 @@ class ATVATDeclaration(Document):
         return
         
     # generate xml export
+    @frappe.whitelist()
     def generate_transfer_file(self):
-        #try:
-        fastnr = frappe.get_value("ERPNextAustria Settings", "ERPNextAustria Settings", "fastnr").replace('.', '')
-        now = datetime.now()
-        data = {
-            'fastnr': fastnr,
-            'datum': "{0:04d}-{1:02d}-{2:02d}".format(now.year, now.month, now.day),
-            'zeit': "{0:02d}:{1:02d}:{2:02d}".format(now.hour, now.minute, now.second),
-            'von': "{0}".format(self.start_date[0:7]),
-            'bis': "{0}".format(self.end_date[0:7]),
-            'kundeninfo': self.company,
-            'revenue': self.revenue,
-            'exports': self.exports,
-            'inner_eu': self.inner_eu,
-            'receiver_vat': self.receiver_vat,
-            'amount_normal': self.amount_normal,
-            'reduced_amount': self.reduced_amount,
-            'tax_057': self.tax_057,
-            'total_pretax': self.total_pretax,
-            'import_pretax': self.import_pretax,
-            'import_charge_pretax': self.import_charge_pretax,
-            'intercommunla_pretax': self.intercommunal_pretax,
-            'taxation_pretax': self.taxation_pretax,
-            'intercommunal_revenue': self.intercommunal_revenue,
-            'amount_inter_normal': self.amount_inter_normal
-        }
+        fastnr = frappe.get_value("ERPNextAustria Settings", "ERPNextAustria Settings", "fastnr")
+        try:
+            data = get_transfer_data(self, fastnr, datetime.now())
+        except ValueError as error:
+            frappe.throw(_(str(error)))
         # render template
         content = frappe.render_template('erpnextaustria/erpnextaustria/doctype/at_vat_declaration/u30.html', data)
      
         return { 'content': content }
-    #except IndexError:
-    #    frappe.msgprint( _("Please select at least one payment."), _("Information") )
-    #    return
-    #except:
-    #    frappe.throw( _("Error while generating xml. Make sure that you made required customisations to the DocTypes.") )
-    #    return
 
 def append_tax(doc, account, debit, credit):
     doc.append('accounts', {

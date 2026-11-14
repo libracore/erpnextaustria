@@ -42,3 +42,28 @@ Refer to [https://github.com/libracore/erpnextaustria/wiki/Release-Notes](https:
     ```
     $ sudo snap install pdftk
     ```
+
+## U30 XML export
+
+The XML export uses the BMF schema effective for the declaration period:
+01/2022 through June/Q2 2026, and 07/2026 from July/Q3 2026 onwards.
+The selected official XSD URL is included in `xsi:noNamespaceSchemaLocation`;
+exporting does not download the schema or submit data. Periods must be complete
+calendar months or quarters from 2022 onwards. Optional amounts which serialize
+to zero are omitted; KZ000 is always included.
+
+Existing declaration amount fields are exported in BMF order, including KZ016
+(`small_businesses`). KZ057 (`tax_057`) is exported under `VERSTEUERT`; KZ066
+(`taxation_pretax`) is independent and must only contain eligible input tax.
+KZ095 is a calculated total and is not an XML element.
+
+For installations with data for the new KZ124/KZ125, the exporter also accepts
+optional Currency custom fields `amount_124` and `amount_125` on `AT VAT Declaration`.
+These are the corresponding taxable bases (not calculated tax amounts). Missing
+fields are treated as zero. Nonzero values before July/Q3 2026 are rejected.
+The export does not create these fields, fetch their values or change the form's
+existing tax calculations, PDF or journal logic. Review those separately if using
+the new bases in the form. The current 07/2026 schema is also used for later
+periods until a replacement is implemented.
+
+See [U30 regression tests and official sources](tests/README.md) for validation.
